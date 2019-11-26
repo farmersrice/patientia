@@ -3,6 +3,8 @@ package game_map;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import units.MobileUnit;
+import units.StaticUnit;
 import units.Unit;
 
 enum Tile {
@@ -11,7 +13,9 @@ enum Tile {
 
 public class GameMap {
 	private Tile[][] terrain;
-	private Unit[][] units;
+	private MobileUnit[][] mobileUnits;
+	private StaticUnit[][] staticUnits;
+	
 	private int[][] lastUpdated; // the last time a tile knowledge was updated
 	private int r, c;
 
@@ -25,7 +29,8 @@ public class GameMap {
 				terrain[i][j] = Tile.UNKNOWN;
 			}
 		}
-		units = new Unit[r][c];
+		mobileUnits = new MobileUnit[r][c];
+		staticUnits = new StaticUnit[r][c];
 	}
 
 	private int[] move_x = { 0, 0, -1, 1, 1, 1, -1, -1 };
@@ -177,7 +182,7 @@ public class GameMap {
 				// Later we can add a circular check or something, for now just use square xd
 
 				result.terrain[i][j] = terrain[i][j];
-				result.units[i][j] = units[i][j];
+				result.mobileUnits[i][j] = mobileUnits[i][j];
 				result.lastUpdated[i][j] = updateTime;
 
 			}
@@ -235,7 +240,8 @@ public class GameMap {
 			}
 		}
 
-		updateUnits(units, other.units, lastUpdated, other.lastUpdated);
+		updateUnits(mobileUnits, other.mobileUnits, lastUpdated, other.lastUpdated);
+		updateUnits(staticUnits, other.staticUnits, lastUpdated, other.lastUpdated);
 	}
 
 }
