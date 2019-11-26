@@ -14,6 +14,10 @@ public abstract class Unit {
 		x = i; y = j; this.team = team; this.id = id; known = k;
 	}
 	
+	public GameMap getKnown() {
+		return known;
+	}
+
 	public boolean isValid() {
 		return valid;
 	}

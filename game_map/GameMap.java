@@ -7,9 +7,6 @@ import units.MobileUnit;
 import units.StaticUnit;
 import units.Unit;
 
-enum Tile {
-	CLEAR, MINERALS, BLOCKED, UNKNOWN, MARKER;
-}
 
 public class GameMap {
 	private Tile[][] terrain;
@@ -31,6 +28,54 @@ public class GameMap {
 		}
 		mobileUnits = new MobileUnit[r][c];
 		staticUnits = new StaticUnit[r][c];
+	}
+
+	public Tile[][] getTerrain() {
+		return terrain;
+	}
+
+	public void setTerrain(Tile[][] terrain) {
+		this.terrain = terrain;
+	}
+
+	public MobileUnit[][] getMobileUnits() {
+		return mobileUnits;
+	}
+
+	public void setMobileUnits(MobileUnit[][] mobileUnits) {
+		this.mobileUnits = mobileUnits;
+	}
+
+	public StaticUnit[][] getStaticUnits() {
+		return staticUnits;
+	}
+
+	public void setStaticUnits(StaticUnit[][] staticUnits) {
+		this.staticUnits = staticUnits;
+	}
+
+	public int[][] getLastUpdated() {
+		return lastUpdated;
+	}
+
+	public void setLastUpdated(int[][] lastUpdated) {
+		this.lastUpdated = lastUpdated;
+	}
+
+	public int getR() {
+		return r;
+	}
+
+	public void setR(int r) {
+		this.r = r;
+	}
+
+	public int getC() {
+		return c;
+	}
+
+	public void setC(int c) {
+		this.c = c;
 	}
 
 	private int[] move_x = { 0, 0, -1, 1, 1, 1, -1, -1 };
@@ -72,6 +117,7 @@ public class GameMap {
 			}
 		}
 		
+		//System.out.println("generating mountains now");
 		for (int i = 0; i < r; i++) {
 			for (int j = 0; j < c; j++) {
 
@@ -86,6 +132,11 @@ public class GameMap {
 					int[][] dist = new int[r][c];
 					int[][][] par = new int[r][c][2];
 
+					for (int k = 0; k < r; k++) {
+						for (int l = 0; l < c; l++) {
+							dist[k][l] = IINF;
+						}
+					}
 					dist[i][j] = 0;
 					par[i][j] = new int[]{-1, -1};
 

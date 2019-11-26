@@ -22,4 +22,38 @@ public class GameManager {
 	public void turn() {
 		
 	}
+
+	public int getNumPlayers() {
+		return numPlayers;
+	}
+
+	public void setNumPlayers(int numPlayers) {
+		this.numPlayers = numPlayers;
+	}
+
+	public Player[] getPlayers() {
+		return players;
+	}
+
+	public void setPlayers(Player[] players) {
+		this.players = players;
+	}
+
+	public GameMap getOmnimap() {
+		return omnimap;
+	}
+
+	public void setOmnimap(GameMap omnimap) {
+		this.omnimap = omnimap;
+	}
+
+	public int getCurrentUnitCounter() {
+		return currentUnitCounter;
+	}
+
+	public void setCurrentUnitCounter(int currentUnitCounter) {
+		this.currentUnitCounter = currentUnitCounter;
+	}
+	
+	
 }
