@@ -42,7 +42,7 @@ public class MoveAction extends Action {
 		
 		MobileUnit[][] mobileUnits = known.getMobileUnits();
 		
-		if (mobileUnits[tx][ty].getId() != us.getId()) return false;
+		if (mobileUnits[tx][ty] != null && mobileUnits[tx][ty].getId() != us.getId()) return false;
 		
 		MobileUnit occupant = mobileUnits[tx][ty];
 		
@@ -54,8 +54,14 @@ public class MoveAction extends Action {
 
 	@Override
 	public void execute(GameManager m) {
-		// TODO Auto-generated method stub
-
+		if (!validate(m)) return;
+		
+		//Add the better logic later, moving ourseles now just a stand int
+		
+		m.getOmnimap().getMobileUnits()[tx][ty] = (MobileUnit) us;
+		m.getOmnimap().getMobileUnits()[us.getX()][us.getY()] = null;
+		
+		us.setX(tx); us.setY(ty);
 	}
 
 }

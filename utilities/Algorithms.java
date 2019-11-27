@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import game_map.GameMap;
 import game_map.Tile;
 import units.MobileUnit;
+import units.Unit;
 
 public class Algorithms {
 	public static int king_move_x[] = {0, 0, -1, 1, 1, 1, -1, -1};
@@ -36,11 +37,11 @@ public class Algorithms {
 		}
 	}
 	
-	public static BfsReturn kingBFS(GameMap known, int i, int j) {
-		return distanceBFS(known, i, j, false);
+	public static BfsReturn kingBFS(GameMap known, int i, int j, Unit ignore) {
+		return distanceBFS(known, i, j, ignore, false);
 	}
 	
-	public static BfsReturn distanceBFS(GameMap known, int x, int y, boolean extendedNeighbors) {
+	public static BfsReturn distanceBFS(GameMap known, int x, int y, Unit ignore, boolean extendedNeighbors) {
 		final int IINF = 1000000000;
 
 		int r = known.getR(), c = known.getC();
@@ -65,7 +66,7 @@ public class Algorithms {
 		Tile[][] terrain = known.getTerrain();
 		MobileUnit[][] mobileUnits = known.getMobileUnits();
 		while (q.size() > 0) {
-			int[] cur = q.pop();
+			int[] cur = q.removeFirst();
 					
 			ArrayList<int[]> neighbors = new ArrayList<int[]>();
 
@@ -85,21 +86,25 @@ public class Algorithms {
 			for (int[] p : neighbors) {
 				if (dist[p[0]][p[1]] < IINF) continue; //Already considered
 				if (terrain[p[0]][p[1]] == Tile.BLOCKED) continue;
-				if (mobileUnits[p[0]][p[1]].isValid()) continue;
+				if (mobileUnits[p[0]][p[1]] != null && mobileUnits[p[0]][p[1]].isValid()
+						&& (ignore == null || mobileUnits[p[0]][p[1]].getId() != ignore.getId())) continue;
 				
 
 				dist[p[0]][p[1]] = dist[cur[0]][cur[1]] + 1;
-				par[p[0]][p[1]] = cur;
-				q.push(p);
+				par[p[0]][p[1]] = new int[] {cur[0], cur[1]};//cur;
+				q.addLast(p);
 			}
 		}
 
 		return new BfsReturn(dist, par);
 	}
 	
-	public static int[] moveTowards(GameMap known, int x, int y, int tx, int ty) {
-		BfsReturn res = kingBFS(known, tx, ty);
-		
+	public static int[] moveTowards(GameMap known, int x, int y, int tx, int ty, Unit ignore) {
+		BfsReturn res = kingBFS(known, tx, ty, ignore);
+		System.out.println("moving from " + x + " " + y + " to " + res.getPar()[x][y][0] + " " + res.getPar()[x][y][1]);
+		System.out.println("distance is " + res.getDist()[x][y]);
+		return res.getPar()[x][y];
+		/*
 		final int IINF = 1000000000;
 		
 		int bestDist = IINF;
@@ -120,6 +125,6 @@ public class Algorithms {
 			}
 		}
 		
-		return nextStep;
+		return nextStep;*/
 	}
 }

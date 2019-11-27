@@ -1,6 +1,7 @@
 package orders;
 
 import actions.Action;
+import actions.MoveAction;
 import units.Unit;
 import utilities.Algorithms;
 
@@ -15,8 +16,8 @@ public class MoveOrder extends Order {
 
 	@Override
 	public Action execute() {
-		int[] nextStep = Algorithms.moveTowards(us.getKnown(), us.getX(), us.getY(), tx, ty);
-		return null;
+		int[] nextStep = Algorithms.moveTowards(us.getKnown(), us.getX(), us.getY(), tx, ty, us);
+		return new MoveAction(us, nextStep[0], nextStep[1]);
 	}
 
 }

@@ -8,6 +8,10 @@ public class DoNothingAction extends Action {
 	public DoNothingAction(Unit u) {
 		super(u);
 	}
+	
+	public DoNothingAction(String s, GameManager m) {
+		super(s, m);
+	}
 
 	@Override
 	public boolean validate(GameManager m) {

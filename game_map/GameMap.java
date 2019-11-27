@@ -28,6 +28,7 @@ public class GameMap {
 		}
 		mobileUnits = new MobileUnit[r][c];
 		staticUnits = new StaticUnit[r][c];
+		lastUpdated = new int[r][c];
 	}
 
 	public Tile[][] getTerrain() {
@@ -234,6 +235,7 @@ public class GameMap {
 
 				result.terrain[i][j] = terrain[i][j];
 				result.mobileUnits[i][j] = mobileUnits[i][j];
+				result.staticUnits[i][j] = staticUnits[i][j];
 				result.lastUpdated[i][j] = updateTime;
 
 			}

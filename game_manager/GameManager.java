@@ -1,14 +1,22 @@
 package game_manager;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import game_map.GameMap;
+import game_map.Tile;
+import orders.MoveOrder;
+import units.Soldier;
+import units.Unit;
 
 public class GameManager {
 	private int numPlayers;
 	private Player[] players;
 	private GameMap omnimap;
 	private int currentUnitCounter = 0;
+	private int turnCounter = 0;
 	
-	GameManager(int rows, int cols, int numPlayers) {
+	public GameManager(int rows, int cols, int numPlayers) {
 		omnimap = new GameMap(rows, cols);
 		omnimap.generate();
 		
@@ -17,10 +25,74 @@ public class GameManager {
 		players = new Player[numPlayers];
 		
 		players[0] = new Player(100, 100, 100);
+		
+		int px = -1;
+		int py = -1;
+		outer:
+		for (int i = 0; i < 100; i++) {
+			for (int j = 0; j < 100; j++) {
+				if (omnimap.getTerrain()[i][j] == Tile.CLEAR) {
+					//Put our unit here
+					omnimap.getMobileUnits()[i][j] = new Soldier(0, currentUnitCounter++, i, j, omnimap.slice(i, j, 2, turnCounter), 1, 1, 1);
+					px = i; py = j;
+					break outer;
+				}
+			}
+		}
+		
+		outer2:
+		for (int i = 100 - 1; i >= 0; i--) {
+			for (int j = 100 - 1; j >= 0; j--) {
+				if (omnimap.getTerrain()[i][j] == Tile.CLEAR) {
+					omnimap.getMobileUnits()[px][py].setOrder(new MoveOrder(omnimap.getMobileUnits()[px][py], i, j));
+					System.out.println("starting is " + px + " " + py + " end is " + i + " " + j);
+					break outer2;
+				}
+			}
+		}
+		
+		
 	}
 	
+	public int getTurnCounter() {
+		return turnCounter;
+	}
+
+	public void setTurnCounter(int turnCounter) {
+		this.turnCounter = turnCounter;
+	}
+
 	public void turn() {
+		ArrayList<Unit> order = new ArrayList<Unit>();
 		
+		Unit[][] units1 = omnimap.getMobileUnits();
+		Unit[][] units2 = omnimap.getStaticUnits();
+		
+		for (int i = 0; i < omnimap.getR(); i++) {
+			for (int j = 0; j < omnimap.getC(); j++) {
+				if (units1[i][j] != null && units1[i][j].isValid()) {
+					order.add(units1[i][j]);
+				}
+				if (units2[i][j] != null && units2[i][j].isValid()) {
+					order.add(units2[i][j]);
+				}
+			}
+		}
+		
+		Collections.shuffle(order);
+		
+		for (Unit u : order) {
+			u.getKnown().updateKnowledge(omnimap.slice(u.getX(), u.getY(), 2, turnCounter));
+		}
+		
+		//In future we want to sync knowledge between soldiers, cities, etc.
+		
+		System.out.println("turn " + turnCounter);
+		for (Unit u : order) {
+			if (u.isValid()) u.getAction().execute(this);
+		}
+		
+		turnCounter++;
 	}
 
 	public int getNumPlayers() {
