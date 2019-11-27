@@ -6,6 +6,8 @@ public class Soldier extends MobileUnit {
 
 	private double soldiers, multiplier, experience;
 	
+	public final int VISIBLE_RADIUS = 2;
+	
 	public Soldier(int team, int id, int i, int j, GameMap k, double s, double m, double e) {
 		super(team, id, i, j, k);
 		soldiers = s; multiplier = m; experience = e;
@@ -20,7 +22,7 @@ public class Soldier extends MobileUnit {
 		return soldiers * getStrengthPerSoldier();
 	}
 	
-	void takeDamage(double opponentStrength) {
+	public void takeDamage(double opponentStrength) {
 		double strengthPerSoldier = getStrengthPerSoldier();
 		
 		double killed = opponentStrength / strengthPerSoldier;
@@ -32,7 +34,7 @@ public class Soldier extends MobileUnit {
 		}
 	}
 	
-	void mergeInto(Soldier other) {
+	public void mergeInto(Soldier other) {
 		other.setExperience((experience * soldiers + other.getExperience() * other.getSoldiers()) / (soldiers + other.getSoldiers()));
 		other.setSoldiers(other.getSoldiers() + soldiers);
 		

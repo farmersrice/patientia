@@ -6,7 +6,7 @@ import orders.Order;
 
 public abstract class Unit {
 	private GameMap known;	//the GameMap that's known to this unit
-	private int team;		//
+	private int team;		//which player controls this unit
 	private int id, x, y;
 	private boolean valid = true;
 	private Order currentOrder; 	//

@@ -3,6 +3,7 @@ package actions;
 import game_manager.GameManager;
 import game_map.GameMap;
 import game_map.Tile;
+import units.City;
 import units.MobileUnit;
 import units.Soldier;
 import units.StaticUnit;
@@ -56,10 +57,38 @@ public class MoveAction extends Action {
 		
 		//Add the better logic later, moving ourseles now just a stand int
 		
-		m.getOmnimap().getMobileUnits()[tx][ty] = (MobileUnit) us;
-		m.getOmnimap().getMobileUnits()[us.getX()][us.getY()] = null;
+		GameMap known = m.getOmnimap();
+		MobileUnit[][] mobileUnits = known.getMobileUnits();
 		
-		us.setX(tx); us.setY(ty);
+		MobileUnit occupant = mobileUnits[tx][ty];
+		
+		if (occupant == null || !occupant.isValid() || !(occupant instanceof Soldier)) {
+			known.getMobileUnits()[tx][ty] = (MobileUnit) us;
+			known.getMobileUnits()[us.getX()][us.getY()] = null;
+			us.setX(tx); us.setY(ty);
+		} else if (occupant instanceof Soldier) {
+			if (occupant.getTeam() == us.getTeam() && us instanceof Soldier) {
+				//Merge into them (delete ourselves)
+				((Soldier)us).mergeInto((Soldier)occupant);
+			} else {
+				//Conquer them
+				double strengthUs = ((Soldier)us).getStrength();
+				double strengthOther = ((Soldier)occupant).getStrength();
+				((Soldier)us).takeDamage(strengthOther);
+				((Soldier)occupant).takeDamage(strengthUs);
+			}
+		}
+		
+		//Set the static unit to ours (conquering city, farm, mine)
+		StaticUnit staticOccupant = known.getStaticUnits()[tx][ty];
+		
+		if (staticOccupant != null && staticOccupant.isValid() && staticOccupant.getTeam() != us.getTeam()) {
+			staticOccupant.setTeam(us.getTeam());
+			if (staticOccupant instanceof City) {
+				//Halve the population due to conquest
+				((City)staticOccupant).setPopulation(((City)staticOccupant).getPopulation() / 2);
+			}
+		}
 	}
 
 }

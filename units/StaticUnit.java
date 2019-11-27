@@ -1,5 +1,6 @@
 package units;
 
+import game_manager.GameManager;
 import game_map.GameMap;
 
 public abstract class StaticUnit extends Unit {
@@ -9,4 +10,5 @@ public abstract class StaticUnit extends Unit {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public abstract void processStaticTurn(GameManager m);
 }
