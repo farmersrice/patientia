@@ -5,10 +5,11 @@ import game_map.GameMap;
 import orders.Order;
 
 public abstract class Unit {
-	private GameMap known;
-	private int team, id, x, y;
+	private GameMap known;	//the GameMap that's known to this unit
+	private int team;		//
+	private int id, x, y;
 	private boolean valid = true;
-	private Order currentOrder;
+	private Order currentOrder; 	//
 	
 	public Unit(int team, int id, int i, int j, GameMap k) {
 		x = i; y = j; this.team = team; this.id = id; known = k;
@@ -32,7 +33,7 @@ public abstract class Unit {
 	}
 	
 	public Action getAction() {
-		return currentOrder.execute();
+		return currentOrder.execute(this);
 	}
 	
 	public void setOrder(Order o) {

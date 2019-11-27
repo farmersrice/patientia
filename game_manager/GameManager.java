@@ -6,7 +6,9 @@ import java.util.Collections;
 import game_map.GameMap;
 import game_map.Tile;
 import orders.MoveOrder;
+import units.MobileUnit;
 import units.Soldier;
+import units.StaticUnit;
 import units.Unit;
 
 public class GameManager {
@@ -44,7 +46,7 @@ public class GameManager {
 		for (int i = 100 - 1; i >= 0; i--) {
 			for (int j = 100 - 1; j >= 0; j--) {
 				if (omnimap.getTerrain()[i][j] == Tile.CLEAR) {
-					omnimap.getMobileUnits()[px][py].setOrder(new MoveOrder(omnimap.getMobileUnits()[px][py], i, j));
+					omnimap.getMobileUnits()[px][py].setOrder(new MoveOrder(i, j));
 					System.out.println("starting is " + px + " " + py + " end is " + i + " " + j);
 					break outer2;
 				}
@@ -89,10 +91,39 @@ public class GameManager {
 		
 		System.out.println("turn " + turnCounter);
 		for (Unit u : order) {
-			if (u.isValid()) u.getAction().execute(this);
+			if (u.isValid()) u.getAction().execute(u, this);
 		}
 		
 		turnCounter++;
+	}
+	
+	private Unit findUnit(String s) {
+		int id = 0;
+		
+		try {
+			id = Integer.parseInt(s.split(" ")[0]);
+		} catch (Exception e) {
+			return null;
+		}
+		
+		GameMap known = omnimap;
+		MobileUnit[][] mobileUnits = known.getMobileUnits();
+		StaticUnit[][] staticUnits = known.getStaticUnits();
+		
+		for (int i = 0; i < known.getR(); i++) {
+			for (int j = 0; j < known.getC(); j++) {
+				if (mobileUnits[i][j] != null && mobileUnits[i][j].isValid() && mobileUnits[i][j].getId() == id) {
+					//us = mobileUnits[i][j];
+					return mobileUnits[i][j];
+				}
+				
+				if (staticUnits[i][j] != null && staticUnits[i][j].isValid() && staticUnits[i][j].getId() == id) {
+					//us = staticUnits[i][j];
+					return staticUnits[i][j];
+				}
+			}
+		}
+		return null;
 	}
 
 	public int getNumPlayers() {

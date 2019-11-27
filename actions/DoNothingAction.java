@@ -5,21 +5,13 @@ import units.Unit;
 
 public class DoNothingAction extends Action {
 
-	public DoNothingAction(Unit u) {
-		super(u);
-	}
-	
-	public DoNothingAction(String s, GameManager m) {
-		super(s, m);
-	}
-
 	@Override
-	public boolean validate(GameManager m) {
+	public boolean validate(Unit us, GameManager m) {
 		return true;
 	}
 
 	@Override
-	public void execute(GameManager m) {
+	public void execute(Unit us, GameManager m) {
 	}
 
 }

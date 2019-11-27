@@ -71,7 +71,7 @@ public class Main extends Application {
 				if (temp.getMobileUnits()[i][j] != null) {
 					gc.setFill(Color.WHITE);
 				}
-				gc.fillRect(4 * i, 4 * j, 4, 4);
+				gc.fillRect(8 * i, 8 * j, 8, 8);
 				
 				
 			}
@@ -90,11 +90,11 @@ public class Main extends Application {
 		stage.setTitle("test");
 		
 		Group root = new Group();
-		Scene s = new Scene(root, 600, 600, Color.BLACK);
+		Scene s = new Scene(root, 1000, 1000, Color.BLACK);
 		
 		
 
-		final Canvas canvas = new Canvas(400,400);
+		final Canvas canvas = new Canvas(800,800);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		
 		GameManager game = new GameManager(100, 100, 2);
@@ -107,14 +107,14 @@ public class Main extends Application {
 		turnButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				//for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 10; i++) {
 					update(gc, game);
 				//	System.out.println("updated");
-				//}
+				}
 			}
 		});
-		turnButton.setTranslateX(450);
-		turnButton.setTranslateY(450);
+		turnButton.setTranslateX(850);
+		turnButton.setTranslateY(850);
 		root.getChildren().add(turnButton);
 
 		System.out.println("initial terrain: ");

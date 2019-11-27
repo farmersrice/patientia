@@ -13,15 +13,12 @@ public class MoveAction extends Action {
 
 	private int tx, ty;
 	
-	public MoveAction(Unit u, int x, int y) {
-		super(u);
+	public MoveAction(int x, int y) {
 		tx = x; ty = y;
 		// TODO Auto-generated constructor stub
 	}
 	
 	public MoveAction(String s, GameManager m) {
-		super(s, m);
-		
 		try {
 			String[] vals = s.split(" ");
 			tx = Integer.parseInt(vals[1]);
@@ -32,13 +29,14 @@ public class MoveAction extends Action {
 	}
 
 	@Override
-	public boolean validate(GameManager m) {
+	public boolean validate(Unit us, GameManager m) {
 		// TODO Auto-generated method stub
-		if (!super.validate(m)) return false;
+		if (!super.validate(us, m)) return false;
 		
 		GameMap known = m.getOmnimap();
 		
 		if (us instanceof StaticUnit) return false; //we cant move lmao
+		if (!Algorithms.isValidCoordinate(tx, ty, known.getR(), known.getC())) return false;
 		
 		MobileUnit[][] mobileUnits = known.getMobileUnits();
 		
@@ -53,8 +51,8 @@ public class MoveAction extends Action {
 	}
 
 	@Override
-	public void execute(GameManager m) {
-		if (!validate(m)) return;
+	public void execute(Unit us, GameManager m) {
+		if (!validate(us, m)) return;
 		
 		//Add the better logic later, moving ourseles now just a stand int
 		
