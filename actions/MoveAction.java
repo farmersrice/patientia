@@ -55,7 +55,6 @@ public class MoveAction extends Action {
 	public void execute(Unit us, GameManager m) {
 		if (!validate(us, m)) return;
 		
-		//Add the better logic later, moving ourseles now just a stand int
 		
 		GameMap known = m.getOmnimap();
 		MobileUnit[][] mobileUnits = known.getMobileUnits();

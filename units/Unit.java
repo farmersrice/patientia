@@ -1,6 +1,7 @@
 package units;
 
 import actions.Action;
+import game_manager.GameManager;
 import game_map.GameMap;
 import orders.Order;
 
@@ -10,6 +11,8 @@ public abstract class Unit {
 	private int id, x, y;
 	private boolean valid = true;
 	private Order currentOrder; 	//
+	
+	public abstract void processPassiveEffects(GameManager m);
 	
 	public Unit(int team, int id, int i, int j, GameMap k) {
 		x = i; y = j; this.team = team; this.id = id; known = k;

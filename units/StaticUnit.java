@@ -9,6 +9,4 @@ public abstract class StaticUnit extends Unit {
 		super(team, id, i, j, k);
 		// TODO Auto-generated constructor stub
 	}
-	
-	public abstract void processStaticTurn(GameManager m);
 }

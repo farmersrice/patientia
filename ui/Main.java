@@ -90,7 +90,7 @@ public class Main extends Application {
 		stage.setTitle("test");
 		
 		Group root = new Group();
-		Scene s = new Scene(root, 1000, 1000, Color.BLACK);
+		Scene s = new Scene(root, 900, 850, Color.WHITE);
 		
 		
 
@@ -113,8 +113,8 @@ public class Main extends Application {
 				}
 			}
 		});
-		turnButton.setTranslateX(850);
-		turnButton.setTranslateY(850);
+		turnButton.setTranslateX(810);
+		turnButton.setTranslateY(810);
 		root.getChildren().add(turnButton);
 
 		System.out.println("initial terrain: ");

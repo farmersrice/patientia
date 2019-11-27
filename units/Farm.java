@@ -11,11 +11,10 @@ public class Farm extends StaticUnit {
 	}
 
 	@Override
-	public void processStaticTurn(GameManager m) {
+	public void processPassiveEffects(GameManager m) {
 		if (getTeam() > m.getNumPlayers()) return; //we can do this in order to place unowned farms around the map, for example
 		
 		Player owner = m.getPlayers()[getTeam()];
 		owner.setFood(owner.getFood() + owner.getFoodMultiplier());
 	}
-
 }

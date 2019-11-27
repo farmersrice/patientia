@@ -1,5 +1,7 @@
 package units;
 
+import game_manager.GameManager;
+import game_manager.Player;
 import game_map.GameMap;
 
 public class Soldier extends MobileUnit {
@@ -63,5 +65,16 @@ public class Soldier extends MobileUnit {
 
 	public void setExperience(double experience) {
 		this.experience = experience;
+	}
+
+	@Override
+	public void processPassiveEffects(GameManager m) {
+		if (getTeam() > m.getNumPlayers()) return; //we can do this in order to place unowned farms around the map, for example
+		
+		Player owner = m.getPlayers()[getTeam()];
+		
+		owner.setFood(owner.getFood() - 2 * soldiers);
+		owner.setWealth(owner.getWealth() - soldiers);
+		
 	}
 }

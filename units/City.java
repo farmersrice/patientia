@@ -30,7 +30,7 @@ public class City extends StaticUnit {
 		super(team, id, i, j, k);
 	}
 	
-	public void processStaticTurn(GameManager m) {
+	public void processPassiveEffects(GameManager m) {
 		if (!populationControlsEnacted) population *= 1.05;
 		
 		if (getTeam() > m.getNumPlayers()) return;
