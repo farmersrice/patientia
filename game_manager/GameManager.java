@@ -7,9 +7,9 @@ import game_map.GameMap;
 import game_map.Tile;
 import orders.MoveOrder;
 import units.MobileUnit;
-import units.Soldier;
 import units.StaticUnit;
 import units.Unit;
+import units.Worker;
 
 public class GameManager {
 	private int numPlayers;
@@ -31,11 +31,11 @@ public class GameManager {
 		int px = -1;
 		int py = -1;
 		outer:
-		for (int i = 0; i < 100; i++) {
-			for (int j = 0; j < 100; j++) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
 				if (omnimap.getTerrain()[i][j] == Tile.CLEAR) {
 					//Put our unit here
-					omnimap.getMobileUnits()[i][j] = new Soldier(0, currentUnitCounter++, i, j, omnimap.slice(i, j, 2, turnCounter), 1, 1, 1);
+					omnimap.getMobileUnits()[i][j] = new Worker(0, currentUnitCounter++, i, j, omnimap.slice(i, j, 2, turnCounter));
 					px = i; py = j;
 					break outer;
 				}
@@ -43,8 +43,8 @@ public class GameManager {
 		}
 		
 		outer2:
-		for (int i = 100 - 1; i >= 0; i--) {
-			for (int j = 100 - 1; j >= 0; j--) {
+		for (int i = rows - 1; i >= 0; i--) {
+			for (int j = cols - 1; j >= 0; j--) {
 				if (omnimap.getTerrain()[i][j] == Tile.CLEAR) {
 					omnimap.getMobileUnits()[px][py].setOrder(new MoveOrder(i, j));
 					System.out.println("starting is " + px + " " + py + " end is " + i + " " + j);
@@ -91,7 +91,10 @@ public class GameManager {
 		
 		System.out.println("turn " + turnCounter);
 		for (Unit u : order) {
-			if (u.isValid()) u.getAction().execute(u, this);
+			if (u.isValid()) {
+				u.processPassiveEffects(this);
+				u.getAction().execute(u, this);
+			}
 		}
 		
 		turnCounter++;
