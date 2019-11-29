@@ -13,10 +13,23 @@ public class MoveOrder extends Order {
 	public MoveOrder(int tx, int ty) {
 		this.tx = tx; this.ty = ty;
 	}
+	
+	public boolean isComplete(Unit us) {
+		
+		
+		boolean curComplete = super.isComplete(us) && us.getX() == tx && us.getY() == ty;
+		
+		if (curComplete) return true;
+		
+		int[] nextStep = Algorithms.moveTowards(us.getKnown(), us.getX(), us.getY(), tx, ty, us);
+		if (nextStep[0] == -1) curComplete = true;
+
+		setComplete(curComplete); //so we don't spam compute moveTowards
+		return curComplete;
+	}
 
 	@Override
 	public Action execute(Unit us) {
-		//Check for completion first
 		
 		if (us.getX() == tx && us.getY() == ty) {
 			setComplete(true);
@@ -26,5 +39,15 @@ public class MoveOrder extends Order {
 		int[] nextStep = Algorithms.moveTowards(us.getKnown(), us.getX(), us.getY(), tx, ty, us);
 		return new MoveAction(nextStep[0], nextStep[1]);
 	}
+
+	public int getTx() {
+		return tx;
+	}
+
+
+	public int getTy() {
+		return ty;
+	}
+
 
 }

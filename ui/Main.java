@@ -1,5 +1,7 @@
 package ui;
 
+import java.util.Queue;
+
 import game_manager.GameManager;
 import game_manager.Player;
 import game_map.GameMap;
@@ -16,14 +18,23 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
+import orders.MoveOrder;
+import orders.Order;
 import units.Unit;
+import units.Worker;
+import utilities.Algorithms;
 
 public class Main extends Application {
 
 	Unit selectedUnit = null;
 	
 	double zoom = 1; //How much bigger in one dimension are you
+	
+	//you may be wondering: why are these final ints not capitalized? well, it's because they won't be final later, they will
+	//be changeable.
 	
 	final int scalingFactor = 10;
 	final int mapRows = 100;
@@ -36,6 +47,75 @@ public class Main extends Application {
 	double dragStartX, dragStartY;
 
 	Image hammerImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\hammer_transparent.png");
+	
+	boolean shiftPressed = false;
+	
+	//copied from https://stackoverflow.com/questions/35751576/javafx-draw-line-with-arrow-canvas
+	final int arrowSize = 8;
+	
+	void drawArrow(GraphicsContext gc, double x1, double y1, double x2, double y2) {
+	    gc.setFill(Color.BLACK);
+
+	    double dx = x2 - x1, dy = y2 - y1;
+	    double angle = Math.atan2(dy, dx);
+	    int len = (int) Math.sqrt(dx * dx + dy * dy);
+
+	    Transform transform = Transform.translate(x1, y1);
+	    transform = transform.createConcatenation(Transform.rotate(Math.toDegrees(angle), 0, 0));
+	    gc.setTransform(new Affine(transform));
+
+	    gc.strokeLine(0, 0, len, 0);
+	    gc.fillPolygon(new double[]{len, len - arrowSize, len - arrowSize, len}, new double[]{0, -arrowSize, arrowSize, 0},
+	            4);
+	    
+	    gc.setTransform(new Affine());
+	}
+	//end copied code
+	
+	
+	double[] cellToScreen(double i, double j) {
+		double totalScaling = scalingFactor * zoom;
+		i *= totalScaling; j *= totalScaling;
+		
+		
+		double topLeftX = cameraX * totalScaling - canvasDimensionX / 2;
+		double topLeftY = cameraY * totalScaling - canvasDimensionY / 2;
+		
+		//System.out.println("before clamp have top left and right as " + topLeftX + " " + topLeftY);
+		/*/
+		topLeftX = Math.max(0, topLeftX); topLeftY = Math.max(0, topLeftY);
+		
+		if (topLeftX + canvasDimensionX > mapRows * totalScaling) {
+			//Clamp it down
+			topLeftX = mapRows * totalScaling - canvasDimensionX;
+		}
+		if (topLeftY + canvasDimensionY > mapCols * totalScaling) {
+			topLeftY = mapCols * totalScaling - canvasDimensionY;
+		}*/
+		
+		//Recalculate cameraX and cameraY to clamp it, essentially, so player never sees anyting
+		//that is "out of bounds" of the map
+		
+		cameraX = (topLeftX + canvasDimensionX / 2) / totalScaling;
+		cameraY = (topLeftY + canvasDimensionY / 2) / totalScaling;
+		
+		return new double[]{i - topLeftX, j - topLeftY};
+	}
+	
+	int[] screenToCell(double i, double j) {
+		double totalScaling = scalingFactor * zoom;
+		
+		double topLeftX = cameraX * totalScaling - canvasDimensionX / 2;
+		double topLeftY = cameraY * totalScaling - canvasDimensionY / 2;
+		
+		double absX = i + topLeftX;
+		double absY = j + topLeftY;
+		
+		int clickedRow = (int)(absX / totalScaling);
+		int clickedCol = (int)(absY / totalScaling);
+		
+		return new int[] {clickedRow, clickedCol};
+	}
 	
 	
 	public void render(GraphicsContext gc, GameManager game, Text t) {
@@ -68,50 +148,69 @@ public class Main extends Application {
 				} else if (terrain[i][j] == Tile.UNKNOWN) {
 					gc.setFill(Color.BLACK);
 				}
+				double totalScaling = zoom * scalingFactor;
+				double[] screenPos = cellToScreen(i, j);
+				gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
 				
-				double ulxabs = i; //upper left x, absolute terms
-				double ulyabs = j;
-				double xrel = ulxabs;
-				double yrel = ulyabs;
+			}
+		}
+		
+		for (int i = 0; i < mapRows; i++) {
+			for (int j = 0; j < mapCols; j++) {
+				Unit curMobileUnit = temp.getMobileUnits()[i][j];
 				
-				double totalScaling = scalingFactor * zoom;
-				xrel *= totalScaling; yrel *= totalScaling;
+				if (curMobileUnit == null) continue;
 				
-				
-				double topLeft = cameraX * totalScaling - canvasDimensionX / 2;
-				double topRight = cameraY * totalScaling - canvasDimensionY / 2;
-				
-				//System.out.println("before clamp have top left and right as " + topLeft + " " + topRight);
-				/*/
-				topLeft = Math.max(0, topLeft); topRight = Math.max(0, topRight);
-				
-				if (topLeft + canvasDimensionX > mapRows * totalScaling) {
-					//Clamp it down
-					topLeft = mapRows * totalScaling - canvasDimensionX;
-				}
-				if (topRight + canvasDimensionY > mapCols * totalScaling) {
-					topRight = mapCols * totalScaling - canvasDimensionY;
-				}*/
-				
-				//Recalculate cameraX and cameraY to clamp it, essentially, so player never sees anyting
-				//that is "out of bounds" of the map
-				
-				cameraX = (topLeft + canvasDimensionX / 2) / totalScaling;
-				cameraY = (topRight + canvasDimensionY / 2) / totalScaling;
-				
-				//System.out.println("cameraX and cameraY are now " + cameraX + " " + cameraY);
-				
-				if (temp.getMobileUnits()[i][j] != null) {
+				if (curMobileUnit != null) {
 					gc.setFill(Color.WHITE);
+					
+					if (curMobileUnit == selectedUnit) {
+						gc.setFill(Color.GOLD);
+						
+						//Highlight the current order (currently only for move orders)
+						
+					}
 					//gc.drawImage(hammerImage, scalingFactor * i, scalingFactor * j, scalingFactor, scalingFactor);
 				}
-				gc.fillRect(xrel - topLeft, yrel - topRight, totalScaling, totalScaling);
 				
-				if (temp.getMobileUnits()[i][j] != null) {
+				double totalScaling = zoom * scalingFactor;
+				
+				double[] screenPos = cellToScreen(i, j);
+				gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
+				
+				if (curMobileUnit != null) {
 					//System.out.println("drawing img");
-					gc.drawImage(hammerImage, xrel - topLeft, yrel - topRight, totalScaling, totalScaling);
+					if (curMobileUnit instanceof Worker) {
+						gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
+					}
+					
+					
+					if (curMobileUnit == selectedUnit) {
+						//Draw orders!
+						
+						Queue<Order> orders = curMobileUnit.getOrders();
+						
+						int lastX = curMobileUnit.getX();
+						int lastY = curMobileUnit.getY();
+						
+						for (Order o : orders) {
+							if (o instanceof MoveOrder) {
+								double[] lastScreenPos = cellToScreen(lastX, lastY);
+								double curCenterX = lastScreenPos[0] + totalScaling / 2;
+								double curCenterY = lastScreenPos[1] + totalScaling / 2;
+								
+								double[] nextPos = cellToScreen(((MoveOrder) o).getTx(), ((MoveOrder) o).getTy());
+								double nextCenterX = nextPos[0] + totalScaling / 2;
+								double nextCenterY = nextPos[1] + totalScaling / 2;
+								
+								drawArrow(gc, curCenterX, curCenterY, nextCenterX, nextCenterY);
+								
+								lastX = ((MoveOrder) o).getTx();
+								lastY = ((MoveOrder) o).getTy();
+							}
+						}
+					}
 				}
-				
 			}
 		}
 		
@@ -138,7 +237,17 @@ public class Main extends Application {
 		Group root = new Group();
 		Scene s = new Scene(root, mapRows * scalingFactor + 100, mapCols * scalingFactor + 100, Color.WHITE);
 		
+		s.setOnKeyPressed(e -> {
+			if (e.isShiftDown()) {
+				shiftPressed = true;
+			}
+		});
 		
+		s.setOnKeyReleased(e -> {
+			if (!e.isShiftDown()) {
+				shiftPressed = false;
+			}
+		});
 
 		final Canvas canvas = new Canvas(canvasDimensionX, canvasDimensionY);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -165,38 +274,64 @@ public class Main extends Application {
 						return;
 					}*/
 					
+					if (!event.isStillSincePress()) return;
 					
-					int clickedRow = (int)(event.getSceneY() / scalingFactor);
-					int clickedCol = (int)(event.getSceneX() / scalingFactor);
+					
+					int[] scrpos = screenToCell(event.getSceneX(), event.getSceneY());
+					int clickedRow = scrpos[0];
+					int clickedCol = scrpos[1];
+					
 					testingText.setText(testingText.getText() + "\nclicked " + 
-							(int)(event.getSceneX() / scalingFactor) + " " + (int)(event.getSceneY() / scalingFactor));
+							clickedRow + " " + clickedCol);
 					
 					//gc.setFill(Color.WHITE);
 					//gc.fillRect(clickedCol * scalingFactor, clickedRow * scalingFactor, scalingFactor, scalingFactor);
 					
 					//Try to select the mobile unit first
-					Unit mobileOnClick = game.getOmnimap().getMobileUnits()[clickedCol][clickedRow];
-					Unit staticOnClick = game.getOmnimap().getStaticUnits()[clickedCol][clickedRow];
+					
+					if (Algorithms.isValidCoordinate(clickedRow, clickedCol, mapRows, mapCols)) {
+						
+						if (event.getButton() != MouseButton.SECONDARY) {
+							//Selecting a unit
+							Unit mobileOnClick = game.getOmnimap().getMobileUnits()[clickedRow][clickedCol];
+							Unit staticOnClick = game.getOmnimap().getStaticUnits()[clickedRow][clickedCol];
 
-					if (selectedUnit == null) {
-						if (mobileOnClick == null) {
-							selectedUnit = staticOnClick;
-						} else {
-							selectedUnit = mobileOnClick;
-						}
-					} else {
-						if (mobileOnClick == null) {
-							//Check if it's the same unit, if yes then deselect
-							selectedUnit = staticOnClick;
-						} else {
-							if (selectedUnit == mobileOnClick && staticOnClick != null) {
-								//Shift to the static unit
-								selectedUnit = staticOnClick;
+							
+							if (selectedUnit == null) {
+								if (mobileOnClick == null) {
+									selectedUnit = staticOnClick;
+								} else {
+									selectedUnit = mobileOnClick;
+								}
 							} else {
-								selectedUnit = mobileOnClick;
+								if (mobileOnClick == null) {
+									//Check if it's the same unit, if yes then deselect
+									selectedUnit = staticOnClick;
+								} else {
+									if (selectedUnit == mobileOnClick && staticOnClick != null) {
+										//Shift to the static unit
+										selectedUnit = staticOnClick;
+									} else {
+										selectedUnit = mobileOnClick;
+									}
+								}
+							}
+						} else {
+							//Move order!
+							if (selectedUnit != null) {
+								if (shiftPressed) {
+									selectedUnit.addOrder(new MoveOrder(clickedRow, clickedCol));
+								} else {
+									selectedUnit.setOrder(new MoveOrder(clickedRow, clickedCol));
+								}
+								
 							}
 						}
+						
+						
+						render(gc, game, testingText);
 					}
+					
 					testingText.setText(testingText.getText() + (selectedUnit != null ? "\nselected unit " + selectedUnit.getId() : ""));
 					//game.getOmnimap().getMobileUnits()[clickedRow][clickedCol] = new Soldier(0, 1, 1, 1, null, 1, 1, 1);
 					
@@ -222,7 +357,7 @@ public class Main extends Application {
 		});
 		
 		canvas.setOnMousePressed(e -> {
-			if (selectedUnit == null && e.getButton() == MouseButton.SECONDARY) {
+			if (e.getButton() == MouseButton.SECONDARY) {
 				//Dragging the map around
 				dragStartX = e.getSceneX();
 				dragStartY = e.getSceneY();
@@ -234,7 +369,8 @@ public class Main extends Application {
 		canvas.setOnMouseDragged(e -> {
 			
 			//System.out.println("got a mouse drag");
-			if (selectedUnit != null) return;
+			//if (selectedUnit != null) return;
+			
 			if (e.getButton() != MouseButton.SECONDARY) return;
 			
 			double dragDeltaX = e.getSceneX() - dragStartX;

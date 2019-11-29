@@ -46,7 +46,7 @@ public class GameManager {
 		for (int i = rows - 1; i >= 0; i--) {
 			for (int j = cols - 1; j >= 0; j--) {
 				if (omnimap.getTerrain()[i][j] == Tile.CLEAR) {
-					omnimap.getMobileUnits()[px][py].setOrder(new MoveOrder(i, j));
+					omnimap.getMobileUnits()[px][py].addOrder(new MoveOrder(i, j));
 					System.out.println("starting is " + px + " " + py + " end is " + i + " " + j);
 					break outer2;
 				}

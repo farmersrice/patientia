@@ -1,6 +1,10 @@
 package units;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import actions.Action;
+import actions.DoNothingAction;
 import game_manager.GameManager;
 import game_map.GameMap;
 import orders.Order;
@@ -10,7 +14,7 @@ public abstract class Unit {
 	private int team;		//which player controls this unit
 	private int id, x, y;
 	private boolean valid = true;
-	private Order currentOrder; 	//
+	private Queue<Order> currentOrders = new LinkedList<Order>();
 	
 	public abstract void processPassiveEffects(GameManager m);
 	
@@ -36,11 +40,31 @@ public abstract class Unit {
 	}
 	
 	public Action getAction() {
-		return currentOrder.execute(this);
+		while (currentOrders.size() > 0 && currentOrders.peek().isComplete(this)) {
+			currentOrders.poll();
+		}
+		
+		if (currentOrders.size() == 0) {
+			return new DoNothingAction();
+		} else {
+			return currentOrders.peek().execute(this);
+		}
+	}
+	
+	public void clearOrders() {
+		currentOrders.clear();
 	}
 	
 	public void setOrder(Order o) {
-		currentOrder = o;
+		clearOrders(); addOrder(o);
+	}
+	
+	public void addOrder(Order o) {
+		currentOrders.add(o);
+	}
+	
+	public Queue<Order> getOrders() {
+		return currentOrders;
 	}
 
 	public int getTeam() {

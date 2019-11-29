@@ -54,10 +54,14 @@ public class Algorithms {
 		}
 		
 		int[][][] par = new int[r][c][2];
-
+		
+		for (int i = 0; i < r; i++) {
+			for (int j = 0; j < c; j++) {
+				par[i][j][0] = -1; par[i][j][1] = -1;
+			}
+		}
 
 		dist[x][y] = 0;
-		par[x][y] = new int[]{-1, -1};
 
 		LinkedList<int[]> q = new LinkedList<int[]>();
 
@@ -67,7 +71,10 @@ public class Algorithms {
 		MobileUnit[][] mobileUnits = known.getMobileUnits();
 		while (q.size() > 0) {
 			int[] cur = q.removeFirst();
-					
+			
+
+			if (terrain[cur[0]][cur[1]] == Tile.BLOCKED) continue;
+			
 			ArrayList<int[]> neighbors = new ArrayList<int[]>();
 
 			if (!extendedNeighbors) {

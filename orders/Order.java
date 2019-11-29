@@ -7,7 +7,7 @@ public abstract class Order {
 	
 	private boolean complete = false; //Did we finish the order?
 	
-	public boolean isComplete() {
+	public boolean isComplete(Unit us) {
 		return complete;
 	}
 
