@@ -9,7 +9,6 @@ public class City extends StaticUnit {
 	private boolean populationControlsEnacted; //stops population growth, but also gives double food upkeep and half wealth output
 	private double population;
 	
-	
 	public boolean isPopulationControlsEnacted() {
 		return populationControlsEnacted;
 	}
@@ -29,7 +28,7 @@ public class City extends StaticUnit {
 	public City(int team, int id, int i, int j, GameMap k) {
 		super(team, id, i, j, k);
 	}
-	
+
 	public void processPassiveEffects(GameManager m) {
 		if (!populationControlsEnacted) population *= 1.05;
 		

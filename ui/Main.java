@@ -54,7 +54,8 @@ public class Main extends Application {
 	final int arrowSize = 8;
 	
 	void drawArrow(GraphicsContext gc, double x1, double y1, double x2, double y2) {
-	    gc.setFill(Color.BLACK);
+	    gc.setFill(Color.WHITE);
+	    gc.setStroke(Color.WHITE);
 
 	    double dx = x2 - x1, dy = y2 - y1;
 	    double angle = Math.atan2(dy, dx);

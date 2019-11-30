@@ -15,6 +15,16 @@ public class GameMap {
 	
 	private int[][] lastUpdated; // the last time a tile knowledge was updated
 	private int r, c;
+	
+	private int updateTime;
+	
+	public int getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(int cloneTime) {
+		this.updateTime = cloneTime;
+	}
 
 	public GameMap(int rows, int cols) {
 		r = rows;
@@ -297,4 +307,12 @@ public class GameMap {
 		updateUnits(staticUnits, other.staticUnits, lastUpdated, other.lastUpdated);
 	}
 
+	
+	public GameMap clone() {
+		try {
+			return (GameMap) super.clone();
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }

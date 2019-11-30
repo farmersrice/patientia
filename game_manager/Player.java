@@ -3,7 +3,11 @@ package game_manager;
 import game_map.GameMap;
 
 public class Player {
-	GameMap known;
+	private GameMap known;
+	private final int PREV_STORED = 50;
+	private GameMap[] prevKnown = new GameMap[PREV_STORED]; //Store the last 50 gamemaps -- hopefully nobody exceeds diameter 250 for now
+	//Obviously we will calculate dynamically, but that's for later
+	//This is used to sync info to the troops
 	
 	private double food, minerals, wealth;
 	
@@ -26,6 +30,19 @@ public class Player {
 			}
 		}
 	}
+	
+	public GameMap getPrevKnown(int backTurns) {
+		if (backTurns <= 0) return known;
+		return prevKnown[backTurns - 1];
+	}
+	
+	public void addKnown() {
+		for (int i = PREV_STORED - 1; i >= 1; i--) {
+			prevKnown[i] = prevKnown[i - 1];
+		}
+		prevKnown[0] = known.clone(); //If we didn't clone we would be stuck with everything pointing to the same map
+	}
+	
 	public double getMineralsMultiplier() {
 		checkResources();
 		return mineralsMultiplier;
@@ -49,7 +66,7 @@ public class Player {
 	public Player(double f, double m, double w) {
 		food = f; minerals = m; wealth = w;
 	}
-
+	
 	public double getWealthMultiplier() {
 		checkResources();
 		return wealthMultiplier;
