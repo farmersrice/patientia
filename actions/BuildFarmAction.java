@@ -19,6 +19,6 @@ public class BuildFarmAction extends BuildStaticUnitAction {
 		
 		GameMap known = m.getOmnimap();
 		known.getStaticUnits()[us.getX()][us.getY()] = 
-				new Farm(us.getTeam(), m.getCurrentUnitCounter(), us.getX(), us.getY(), known);
+				new Farm(us.getTeam(), m.getCurrentUnitCounter(), us.getX(), us.getY(), us.getKnown());
 	}
 }

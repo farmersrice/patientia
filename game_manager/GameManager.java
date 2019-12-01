@@ -152,7 +152,7 @@ public class GameManager {
 		
 		ArrayList<OutstandingOrder> filtered = new ArrayList<OutstandingOrder>();
 		for (OutstandingOrder o : outstandingOrders) {
-			if (!o.isDone()) {
+			if (!o.isDone() && o.getTarget().isValid()) {
 				filtered.add(o);
 			}
 		}

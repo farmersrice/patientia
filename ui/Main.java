@@ -3,11 +3,11 @@ package ui;
 import java.util.Queue;
 
 import game_manager.GameManager;
+import game_manager.OutstandingOrder;
 import game_manager.Player;
 import game_map.GameMap;
 import game_map.Tile;
 import javafx.application.Application;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -29,9 +29,15 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
+import orders.BuildCityOrder;
+import orders.BuildFarmOrder;
+import orders.BuildMineOrder;
+import orders.CreateSoldierOrder;
+import orders.CreateWorkerOrder;
 import orders.MoveOrder;
 import orders.Order;
 import units.City;
+import units.Soldier;
 import units.Unit;
 import units.Worker;
 import utilities.Algorithms;
@@ -68,7 +74,7 @@ public class Main extends Application {
 	final int scalingFactor = 10;
 	final int mapRows = 100;
 	final int mapCols = 60;
-	final int numPlayers = 3;
+	final int numPlayers = 1;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
 	double cameraX = mapRows / 2.0;
@@ -262,6 +268,12 @@ public class Main extends Application {
 						gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
 				}
 				
+				if (curMobileUnit instanceof Soldier) {
+					if (!(curMobileUnit != selectedUnit && selectedUnit != null && curMobileUnit.getX() == selectedUnit.getX() && 
+							curMobileUnit.getY() == selectedUnit.getY())) 
+						gc.drawImage(swordImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
+				}
+				
 				
 				if (curMobileUnit == selectedUnit) {
 					//Draw orders!
@@ -368,6 +380,30 @@ public class Main extends Application {
 		
 		info.getChildren().add(testingText);
 		
+		Button createSoldierButton = new Button("Create soldier");
+		createSoldierButton.setOnAction(e -> {
+			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new CreateSoldierOrder(1), !shiftPressed));
+		});
+		Button createWorkerButton = new Button("Create worker");
+		createWorkerButton.setOnAction(e -> {
+			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new CreateWorkerOrder(), !shiftPressed));
+		});
+		
+		Button buildFarmButton = new Button("Build farm");
+		buildFarmButton.setOnAction(e -> {
+			System.out.println("buton clickd");
+			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new BuildFarmOrder(), !shiftPressed));
+		});
+		Button buildCityButton = new Button("Build city");
+		buildCityButton.setOnAction(e -> {
+			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new BuildCityOrder(), !shiftPressed));
+		});
+		Button buildMineButton = new Button("Build mine");
+		buildMineButton.setOnAction(e -> {
+			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new BuildMineOrder(), !shiftPressed));
+		});
+		
+		
 		canvas.setOnMouseClicked(
 				event -> {
 					
@@ -410,11 +446,9 @@ public class Main extends Application {
 						} else {
 							//Move order!
 							if (selectedUnit != null) {
-								if (shiftPressed) {
-									selectedUnit.addOrder(new MoveOrder(clickedRow, clickedCol));
-								} else {
-									selectedUnit.setOrder(new MoveOrder(clickedRow, clickedCol));
-								}
+								Order o = new MoveOrder(clickedRow, clickedCol);
+								
+								game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), o, !shiftPressed));
 							}
 						}
 						
@@ -428,9 +462,34 @@ public class Main extends Application {
 							for (Order o : selectedUnit.getOrders()) {
 								orderList.add(o.toString());
 							}
+							
+							//Remove all buttons from the system
+							orderBox.getChildren().remove(createWorkerButton);
+							orderBox.getChildren().remove(createSoldierButton);
+							orderBox.getChildren().remove(buildFarmButton);
+							orderBox.getChildren().remove(buildMineButton);
+							orderBox.getChildren().remove(buildCityButton);
+							
+							if (selectedUnit instanceof City) {
+								//Add creation buttons
+								orderBox.getChildren().add(createWorkerButton);
+								orderBox.getChildren().add(createSoldierButton);
+							} else if (selectedUnit instanceof Worker) {
+								orderBox.getChildren().add(buildFarmButton);
+								orderBox.getChildren().add(buildMineButton);
+								orderBox.getChildren().add(buildCityButton);
+							}
 						} else {
 							selectedUnitOrdersText.setVisible(false);
 							orderListView.setVisible(false);
+
+							//Remove all buttons from the system
+							orderBox.getChildren().remove(createWorkerButton);
+							orderBox.getChildren().remove(createSoldierButton);
+							orderBox.getChildren().remove(buildFarmButton);
+							orderBox.getChildren().remove(buildMineButton);
+							orderBox.getChildren().remove(buildCityButton);
+							
 						}
 						render(gc, game, testingText);
 					}
@@ -493,9 +552,9 @@ public class Main extends Application {
 		turnButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				for (int i = 0; i < 10; i++) {
+				//for (int i = 0; i < 10; i++) {
 					update(gc, game, testingText);
-				}
+				//}
 			}
 		});
 		

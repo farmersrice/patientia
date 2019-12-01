@@ -21,7 +21,11 @@ public class BuildCityAction extends BuildStaticUnitAction {
 		
 		GameMap known = m.getOmnimap();
 		known.getStaticUnits()[us.getX()][us.getY()] = 
-				new City(us.getTeam(), m.getCurrentUnitCounter(), us.getX(), us.getY(), known);
+				new City(us.getTeam(), m.getCurrentUnitCounter(), us.getX(), us.getY(), us.getKnown());
+		
+		//Consume the worker
+		known.getMobileUnits()[us.getX()][us.getY()] = null;
+		us.setValid(false);
 	}
 
 }

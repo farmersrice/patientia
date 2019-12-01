@@ -6,8 +6,8 @@ import game_map.GameMap;
 
 public class City extends StaticUnit {
 
-	private boolean populationControlsEnacted; //stops population growth, but also gives double food upkeep and half wealth output
-	private double population;
+	private boolean populationControlsEnacted = false; //stops population growth, but also gives double food upkeep and half wealth output
+	private double population = 1;
 	
 	public boolean isPopulationControlsEnacted() {
 		return populationControlsEnacted;
