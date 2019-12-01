@@ -73,6 +73,7 @@ public class Main extends Application {
 	double dragStartX, dragStartY;
 
 	Image hammerImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\hammer_transparent.png");
+	Image sbeve = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\sbeve.png");
 	
 	boolean shiftPressed = false;
 	
@@ -202,7 +203,7 @@ public class Main extends Application {
 				
 				//System.out.println("drawing img");
 				if (curStaticUnit instanceof City) {
-					gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
+					gc.drawImage(sbeve, screenPos[0], screenPos[1], totalScaling, totalScaling);
 				}
 				
 				
