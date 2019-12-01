@@ -8,8 +8,17 @@ public class OutstandingOrder {
 	private int timeIssued;
 	private Unit target;
 	
-	boolean set;
+	private boolean set;
+	private boolean done = false;
 	
+	public boolean isDone() {
+		return done;
+	}
+
+	public void setDone(boolean done) {
+		this.done = done;
+	}
+
 	public OutstandingOrder(Unit target, int timeIssued, Order order, boolean set) {
 		this.target = target; this.timeIssued = timeIssued; this.order = order; this.set = set;
 	}

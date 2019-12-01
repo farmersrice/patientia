@@ -8,7 +8,7 @@ import units.StaticUnit;
 import units.Unit;
 
 
-public class GameMap {
+public class GameMap implements Cloneable {
 	private Tile[][] terrain;
 	private MobileUnit[][] mobileUnits;
 	private StaticUnit[][] staticUnits;
@@ -312,6 +312,8 @@ public class GameMap {
 		try {
 			return (GameMap) super.clone();
 		} catch (Exception e) {
+			System.out.println("bad clone");
+			e.printStackTrace();
 			return null;
 		}
 	}

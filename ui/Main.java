@@ -9,6 +9,8 @@ import game_map.Tile;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -16,6 +18,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -23,9 +27,30 @@ import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import orders.MoveOrder;
 import orders.Order;
+import units.City;
 import units.Unit;
 import units.Worker;
 import utilities.Algorithms;
+
+
+
+/*
+ * 
+ * 
+ * 
+ * 
+ * READ THESE
+ * 
+ * 
+ * 
+ * https://docs.oracle.com/javafx/2/layout/builtin_layouts.htm
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 
 public class Main extends Application {
 
@@ -39,6 +64,7 @@ public class Main extends Application {
 	final int scalingFactor = 10;
 	final int mapRows = 100;
 	final int mapCols = 60;
+	final int numPlayers = 3000;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
 	double cameraX = mapRows / 2.0;
@@ -156,68 +182,93 @@ public class Main extends Application {
 			}
 		}
 		
+		//Draw static units
+		for (int i = 0; i < mapRows; i++) {
+			for (int j = 0; j < mapCols; j++) {
+				Unit curStaticUnit = temp.getStaticUnits()[i][j];
+				
+				if (curStaticUnit == null) continue;
+				
+				//gc.setFill(Color.WHITE);
+
+				double totalScaling = zoom * scalingFactor;
+				double[] screenPos = cellToScreen(i, j);
+				
+				if (curStaticUnit == selectedUnit) {
+					gc.setFill(Color.GOLD);
+					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
+					//Highlight selected unit gold
+				}
+				
+				//System.out.println("drawing img");
+				if (curStaticUnit instanceof City) {
+					gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
+				}
+				
+				
+				if (curStaticUnit == selectedUnit) {
+					if (curStaticUnit instanceof City) {
+						//Add some cute buttons to spawn units and whatnot
+						
+					}
+				}
+			}
+		}
+		
+		//Draw mobile units
 		for (int i = 0; i < mapRows; i++) {
 			for (int j = 0; j < mapCols; j++) {
 				Unit curMobileUnit = temp.getMobileUnits()[i][j];
 				
 				if (curMobileUnit == null) continue;
 				
-				if (curMobileUnit != null) {
-					gc.setFill(Color.WHITE);
-					
-					if (curMobileUnit == selectedUnit) {
-						gc.setFill(Color.GOLD);
-						
-						//Highlight the current order (currently only for move orders)
-						
-					}
-					//gc.drawImage(hammerImage, scalingFactor * i, scalingFactor * j, scalingFactor, scalingFactor);
-				}
+				//gc.setFill(Color.WHITE);
 				
 				double totalScaling = zoom * scalingFactor;
 				
 				double[] screenPos = cellToScreen(i, j);
-				gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
+				if (curMobileUnit == selectedUnit) {
+					gc.setFill(Color.GOLD);
+					//Highlight selected unit gold
+					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
+				}
 				
-				if (curMobileUnit != null) {
-					//System.out.println("drawing img");
-					if (curMobileUnit instanceof Worker) {
-						gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
-					}
+				
+				
+
+
+				if (curMobileUnit instanceof Worker) {
+					gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
+				}
+				
+				
+				if (curMobileUnit == selectedUnit) {
+					//Draw orders!
 					
+					Queue<Order> orders = curMobileUnit.getOrders();
 					
-					if (curMobileUnit == selectedUnit) {
-						//Draw orders!
-						
-						Queue<Order> orders = curMobileUnit.getOrders();
-						
-						int lastX = curMobileUnit.getX();
-						int lastY = curMobileUnit.getY();
-						
-						for (Order o : orders) {
-							if (o instanceof MoveOrder) {
-								double[] lastScreenPos = cellToScreen(lastX, lastY);
-								double curCenterX = lastScreenPos[0] + totalScaling / 2;
-								double curCenterY = lastScreenPos[1] + totalScaling / 2;
-								
-								double[] nextPos = cellToScreen(((MoveOrder) o).getTx(), ((MoveOrder) o).getTy());
-								double nextCenterX = nextPos[0] + totalScaling / 2;
-								double nextCenterY = nextPos[1] + totalScaling / 2;
-								
-								drawArrow(gc, curCenterX, curCenterY, nextCenterX, nextCenterY);
-								
-								lastX = ((MoveOrder) o).getTx();
-								lastY = ((MoveOrder) o).getTy();
-							}
+					int lastX = curMobileUnit.getX();
+					int lastY = curMobileUnit.getY();
+					
+					for (Order o : orders) {
+						if (o instanceof MoveOrder) {
+							double[] lastScreenPos = cellToScreen(lastX, lastY);
+							double curCenterX = lastScreenPos[0] + totalScaling / 2;
+							double curCenterY = lastScreenPos[1] + totalScaling / 2;
+							
+							double[] nextPos = cellToScreen(((MoveOrder) o).getTx(), ((MoveOrder) o).getTy());
+							double nextCenterX = nextPos[0] + totalScaling / 2;
+							double nextCenterY = nextPos[1] + totalScaling / 2;
+							
+							drawArrow(gc, curCenterX, curCenterY, nextCenterX, nextCenterY);
+							
+							lastX = ((MoveOrder) o).getTx();
+							lastY = ((MoveOrder) o).getTy();
 						}
 					}
 				}
 			}
 		}
-		
-		//The x, y here are inverted (x is across columns).
-		//gc.setFill(Color.WHITE);
-		//gc.fillRect(40 * scalingFactor, 20 * scalingFactor, 10 * scalingFactor, 10 * scalingFactor);
 		
 		Player us = game.getPlayers()[0];
 		t.setText("Food: " + us.getFood() + '\n' + "Minerals: " + us.getMinerals() + 
@@ -232,11 +283,27 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage stage) throws Exception {
-		// TODO Auto-generated method stub
 		stage.setTitle("test");
 		
+		//Group root = new Group();
+		//Scene s = new Scene(root, mapRows * scalingFactor + 100, mapCols * scalingFactor + 100, Color.WHITE);
+		
+		BorderPane bPane = new BorderPane();
+		
 		Group root = new Group();
-		Scene s = new Scene(root, mapRows * scalingFactor + 100, mapCols * scalingFactor + 100, Color.WHITE);
+		bPane.setCenter(root);
+		
+		BorderPane infoPane = new BorderPane();
+		
+		VBox info = new VBox(25);
+		
+		infoPane.setTop(info);
+		
+		bPane.setRight(infoPane);
+		
+		BorderPane.setMargin(infoPane, new Insets(10)); //add border of 10 around our info
+		
+		Scene s = new Scene(bPane);
 		
 		s.setOnKeyPressed(e -> {
 			if (e.isShiftDown()) {
@@ -253,27 +320,17 @@ public class Main extends Application {
 		final Canvas canvas = new Canvas(canvasDimensionX, canvasDimensionY);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		
-		GameManager game = new GameManager(mapRows, mapCols, 2);
+		GameManager game = new GameManager(mapRows, mapCols, numPlayers);
 		
 		root.getChildren().add(canvas);
 		
 		Text testingText = new Text();
+		//testingText.wrappingWidthProperty().bind(info.widthProperty().subtract(15));
 		
-		testingText.setTranslateX(mapRows * scalingFactor + 10);
-		testingText.setTranslateY(10);
-		root.getChildren().add(testingText);
+		info.getChildren().add(testingText);
 		
 		canvas.setOnMouseClicked(
 				event -> {
-					/*
-					if (selectedUnit == null && event.getButton() == MouseButton.SECONDARY) {
-						//Dragging the map around
-						dragStartX = event.getSceneX();
-						dragStartY = event.getSceneY();
-
-						System.out.println("found start pos as " + dragStartX + ' ' + dragStartY);
-						return;
-					}*/
 					
 					if (!event.isStillSincePress()) return;
 					
@@ -281,12 +338,6 @@ public class Main extends Application {
 					int[] scrpos = screenToCell(event.getSceneX(), event.getSceneY());
 					int clickedRow = scrpos[0];
 					int clickedCol = scrpos[1];
-					
-					testingText.setText(testingText.getText() + "\nclicked " + 
-							clickedRow + " " + clickedCol);
-					
-					//gc.setFill(Color.WHITE);
-					//gc.fillRect(clickedCol * scalingFactor, clickedRow * scalingFactor, scalingFactor, scalingFactor);
 					
 					//Try to select the mobile unit first
 					
@@ -325,7 +376,6 @@ public class Main extends Application {
 								} else {
 									selectedUnit.setOrder(new MoveOrder(clickedRow, clickedCol));
 								}
-								
 							}
 						}
 						
@@ -393,13 +443,19 @@ public class Main extends Application {
 			public void handle(ActionEvent e) {
 				for (int i = 0; i < 10; i++) {
 					update(gc, game, testingText);
-				//	System.out.println("updated");
 				}
 			}
 		});
-		turnButton.setTranslateX(mapRows * scalingFactor + 10);
-		turnButton.setTranslateY(mapCols * scalingFactor + 10);
-		root.getChildren().add(turnButton);
+		
+		VBox turnButtonBox = new VBox();
+		turnButtonBox.setAlignment(Pos.BOTTOM_CENTER);
+		turnButtonBox.getChildren().add(turnButton);
+		infoPane.setBottom(turnButtonBox);
+		
+		
+		//turnButton.setTranslateX(mapRows * scalingFactor + 10);
+		//turnButton.setTranslateY(mapCols * scalingFactor + 10);
+		//root.getChildren().add(turnButton);
 		
 		
 		

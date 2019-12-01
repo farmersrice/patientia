@@ -49,5 +49,8 @@ public class MoveOrder extends Order {
 		return ty;
 	}
 
+	public String toString() {
+		return "Move to " + tx + " " + ty;
+	}
 
 }

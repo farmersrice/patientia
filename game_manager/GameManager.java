@@ -35,6 +35,8 @@ public class GameManager {
 		playerKnownUpdateQueues = new PriorityQueue[numPlayers];
 		
 		for (int i = 0; i < numPlayers; i++) {
+			players[i] = new Player(100, 100, 100);
+			
 			//The maps with the earliest times get updated first
 			playerKnownUpdateQueues[i] = new PriorityQueue<GameMap>((a, b) -> a.getUpdateTime() - b.getUpdateTime());
 		}
@@ -139,9 +141,20 @@ public class GameManager {
 					} else {
 						u.addOrder(o.getOrder());
 					}
+					
+					o.setDone(true);
 				}
 			}
 		}
+		
+		ArrayList<OutstandingOrder> filtered = new ArrayList<OutstandingOrder>();
+		for (OutstandingOrder o : outstandingOrders) {
+			if (!o.isDone()) {
+				filtered.add(o);
+			}
+		}
+		outstandingOrders = filtered;
+		
 		
 		//Update all players' knowledge AGAIN in case we added some with zero delay in the unit map updating
 		
