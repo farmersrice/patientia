@@ -7,6 +7,9 @@ import game_manager.Player;
 import game_map.GameMap;
 import game_map.Tile;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -16,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
@@ -64,7 +68,7 @@ public class Main extends Application {
 	final int scalingFactor = 10;
 	final int mapRows = 100;
 	final int mapCols = 60;
-	final int numPlayers = 3000;
+	final int numPlayers = 3;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
 	double cameraX = mapRows / 2.0;
@@ -74,8 +78,12 @@ public class Main extends Application {
 
 	Image hammerImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\hammer_transparent.png");
 	Image sbeve = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\sbeve.png");
+	Image swordImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\sword_transparent.png");
+	Image cityImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\city_transparent.png");
 	
 	boolean shiftPressed = false;
+	
+	ObservableList<String> orderList;
 	
 	//copied from https://stackoverflow.com/questions/35751576/javafx-draw-line-with-arrow-canvas
 	final int arrowSize = 8;
@@ -199,11 +207,16 @@ public class Main extends Application {
 					gc.setFill(Color.GOLD);
 					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
 					//Highlight selected unit gold
+					
+					orderList.clear();
+					for (Order o : selectedUnit.getOrders()) {
+						orderList.add(o.toString());
+					}
 				}
 				
 				//System.out.println("drawing img");
 				if (curStaticUnit instanceof City) {
-					gc.drawImage(sbeve, screenPos[0], screenPos[1], totalScaling, totalScaling);
+					gc.drawImage(cityImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
 				}
 				
 				
@@ -232,6 +245,11 @@ public class Main extends Application {
 					gc.setFill(Color.GOLD);
 					//Highlight selected unit gold
 					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
+					
+					orderList.clear();
+					for (Order o : selectedUnit.getOrders()) {
+						orderList.add(o.toString());
+					}
 				}
 				
 				
@@ -239,7 +257,9 @@ public class Main extends Application {
 
 
 				if (curMobileUnit instanceof Worker) {
-					gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
+					if (!(curMobileUnit != selectedUnit && selectedUnit != null && curMobileUnit.getX() == selectedUnit.getX() && 
+							curMobileUnit.getY() == selectedUnit.getY())) 
+						gc.drawImage(hammerImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
 				}
 				
 				
@@ -296,6 +316,23 @@ public class Main extends Application {
 		
 		BorderPane infoPane = new BorderPane();
 		
+		orderList = FXCollections.observableArrayList("hi", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet", "hi2", "yeet");
+		ListView<String> orderListView = new ListView<String>(orderList);
+		
+		VBox orderBox = new VBox(5);
+		
+		Text selectedUnitOrdersText = new Text("Selected unit orders: ");
+		orderBox.getChildren().add(selectedUnitOrdersText);
+		selectedUnitOrdersText.setVisible(false);
+		
+		final int LIST_CELL_HEIGHT = 24;
+		orderListView.setMaxHeight(LIST_CELL_HEIGHT * 15);
+		orderListView.prefHeightProperty().bind(orderListView.maxHeightProperty().multiply(LIST_CELL_HEIGHT));
+		orderBox.getChildren().add(orderListView);
+		orderListView.setVisible(false);
+		
+		infoPane.setCenter(orderBox);
+		
 		VBox info = new VBox(25);
 		
 		infoPane.setTop(info);
@@ -303,6 +340,7 @@ public class Main extends Application {
 		bPane.setRight(infoPane);
 		
 		BorderPane.setMargin(infoPane, new Insets(10)); //add border of 10 around our info
+		BorderPane.setMargin(orderBox, new Insets(5));
 		
 		Scene s = new Scene(bPane);
 		
@@ -380,7 +418,20 @@ public class Main extends Application {
 							}
 						}
 						
-						
+						if (selectedUnit != null) {
+							selectedUnitOrdersText.setVisible(true);
+							orderListView.setVisible(true);
+							
+							//Modify the orderList to give us the right names that we want
+							
+							orderList.clear();
+							for (Order o : selectedUnit.getOrders()) {
+								orderList.add(o.toString());
+							}
+						} else {
+							selectedUnitOrdersText.setVisible(false);
+							orderListView.setVisible(false);
+						}
 						render(gc, game, testingText);
 					}
 					

@@ -37,6 +37,7 @@ public class Player {
 	}
 	
 	public void addKnown() {
+		System.out.println("adding known to player");
 		for (int i = PREV_STORED - 1; i >= 1; i--) {
 			prevKnown[i] = prevKnown[i - 1];
 		}

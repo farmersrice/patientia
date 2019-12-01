@@ -10,6 +10,7 @@ import units.City;
 import units.MobileUnit;
 import units.StaticUnit;
 import units.Unit;
+import units.Worker;
 
 public class GameManager {
 	private int numPlayers;
@@ -56,6 +57,8 @@ public class GameManager {
 			
 			omnimap.getStaticUnits()[capitalX][capitalY] = 
 					new City(i, currentUnitCounter++, capitalX, capitalY, omnimap.slice(capitalX, capitalY, 5, 0));
+			omnimap.getMobileUnits()[capitalX][capitalY] = 
+					new Worker(i, currentUnitCounter++, capitalX, capitalY, omnimap.slice(capitalX, capitalY, 5, 0));
 			players[i].setKnown(omnimap.getStaticUnits()[capitalX][capitalY].getKnown());
 		}
 	}
@@ -120,7 +123,7 @@ public class GameManager {
 				shortestDistance = Math.min(shortestDistance, dx * dx + dy * dy);
 			}
 			
-			int backTurns = shortestDistance / (COMMUNICATION_SPEED * COMMUNICATION_SPEED);
+			int backTurns = (int) Math.floor(Math.sqrt(shortestDistance) / COMMUNICATION_SPEED);
 			
 			u.getKnown().updateKnowledge(players[u.getTeam()].getPrevKnown(backTurns));
 			
