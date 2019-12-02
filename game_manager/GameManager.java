@@ -17,7 +17,7 @@ public class GameManager {
 	private Player[] players;
 	private GameMap omnimap;
 	private int currentUnitCounter = 0;
-	private int turnCounter = 0;
+	private int turnCounter = 1;
 	private PriorityQueue<GameMap>[] playerKnownUpdateQueues;
 	
 	private ArrayList<OutstandingOrder> outstandingOrders = new ArrayList<OutstandingOrder>(); 

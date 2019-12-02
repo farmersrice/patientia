@@ -338,6 +338,8 @@ public class Main extends Application {
 		ArrayList<TimedOrder> futureOrderStateUnfiltered = new ArrayList<TimedOrder>();
 		
 		for (OutstandingOrder o : game.getOutstandingOrders()) {
+			if (o.getTarget().getId() != selectedUnit.getId()) continue;
+			
 			futureOrderStateUnfiltered.add(new TimedOrder(o.getTimeIssued() + game.getLag(selectedUnit) - game.getTurnCounter(),
 					o.getOrder(), o.isSet(), true));
 		}
