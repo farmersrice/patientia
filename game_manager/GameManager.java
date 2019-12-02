@@ -17,7 +17,7 @@ public class GameManager {
 	private Player[] players;
 	private GameMap omnimap;
 	private int currentUnitCounter = 0;
-	private int turnCounter = 1;
+	private int turnCounter = 0;
 	private PriorityQueue<GameMap>[] playerKnownUpdateQueues;
 	
 	private ArrayList<OutstandingOrder> outstandingOrders = new ArrayList<OutstandingOrder>(); 
@@ -59,7 +59,7 @@ public class GameManager {
 					new City(i, currentUnitCounter++, capitalX, capitalY, omnimap.slice(capitalX, capitalY, 5, 0));
 			omnimap.getMobileUnits()[capitalX][capitalY] = 
 					new Worker(i, currentUnitCounter++, capitalX, capitalY, omnimap.slice(capitalX, capitalY, 5, 0));
-			players[i].setKnown(omnimap.getStaticUnits()[capitalX][capitalY].getKnown());
+			players[i].setKnown(omnimap.slice(capitalX, capitalY, 5, 0));
 		}
 	}
 	

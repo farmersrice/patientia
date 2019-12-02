@@ -28,7 +28,7 @@ public class CreateSoldierAction extends CreateMobileUnitAction {
 		
 		int x = us.getX(); int y = us.getY();
 		
-		mobileUnits[x][y] = new Soldier(us.getTeam(), m.getCurrentUnitCounter(), x, y, us.getKnown(),
+		mobileUnits[x][y] = new Soldier(us.getTeam(), m.getCurrentUnitCounter(), x, y, us.getKnown().clone(),
 				numSoldiers, m.getPlayers()[us.getTeam()].getCombatMultiplier(), 0);
 		m.setCurrentUnitCounter(m.getCurrentUnitCounter() + 1);
 	}

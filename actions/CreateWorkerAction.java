@@ -25,7 +25,7 @@ public class CreateWorkerAction extends CreateMobileUnitAction {
 		
 		int x = us.getX(); int y = us.getY();
 		
-		mobileUnits[x][y] = new Worker(us.getTeam(), m.getCurrentUnitCounter(), x, y, us.getKnown());
+		mobileUnits[x][y] = new Worker(us.getTeam(), m.getCurrentUnitCounter(), x, y, us.getKnown().clone());
 		m.setCurrentUnitCounter(m.getCurrentUnitCounter() + 1);
 	}
 
