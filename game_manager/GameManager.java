@@ -36,7 +36,7 @@ public class GameManager {
 		playerKnownUpdateQueues = new PriorityQueue[numPlayers];
 		
 		for (int i = 0; i < numPlayers; i++) {
-			players[i] = new Player(100, 100, 100);
+			players[i] = new Player(100000, 100, 100);
 			
 			//The maps with the earliest times get updated first
 			playerKnownUpdateQueues[i] = new PriorityQueue<GameMap>((a, b) -> a.getUpdateTime() - b.getUpdateTime());

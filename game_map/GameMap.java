@@ -275,6 +275,38 @@ public class GameMap implements Cloneable {
 			}
 		}
 		
+		
+		for (int i = 0; i < r; i++) {
+			for (int j = 0; j < c; j++) {
+				if (otherLastUpdated[i][j] > usLastUpdated[i][j]) {
+					//Always update to the newest info
+					us[i][j] = other[i][j];
+				}
+			}
+		}
+		
+		
+		//Erase duplicates by taking only the latest sighting
+		
+		for (int i = 0; i < r; i++) {
+			for (int j = 0; j < c; j++) {
+				if (us[i][j] != null && us[i][j].isValid()) {
+					if (latestSeen.get(us[i][j]) > Math.max(otherLastUpdated[i][j], usLastUpdated[i][j])) {
+						//It's bad, we have a newer version seen
+						us[i][j] = null;
+						
+						//Note that if we have an old sighting in us, then a newer sighting in other,
+						//but us known has an even newer sighting than that showing nothing in the other newer sighting
+						//then the unit will be erased from our map totally.
+					}
+				}
+			}
+		}
+		
+		
+		
+		//Bugged code below
+		/*
 		for (int i = 0; i < r; i++) {
 			for (int j = 0; j < c; j++) {
 				if (us[i][j] != null && us[i][j].isValid() && usLastUpdated[i][j] < latestSeen.get(us[i][j])) {
@@ -282,14 +314,15 @@ public class GameMap implements Cloneable {
 				}
 				
 				if (other[i][j] != null && other[i][j].isValid() && otherLastUpdated[i][j] == latestSeen.get(other[i][j])) {
-					us[i][j] = other[i][j];
+					if (otherLastUpdated[i][j] > usLastUpdated[i][j])
+						us[i][j] = other[i][j];
 				}
 				
 				if (otherLastUpdated[i][j] > usLastUpdated[i][j]) {
 					us[i][j] = other[i][j];
 				}
 			}
-		}
+		}*/
 	}
 
 	public void updateKnowledge(GameMap other) {
