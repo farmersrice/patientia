@@ -17,4 +17,8 @@ public abstract class Order {
 
 
 	public abstract Action execute(Unit us);
+	
+	public int expectedCompletionTime(Unit us) {
+		return 1;
+	}
 }

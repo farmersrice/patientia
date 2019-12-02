@@ -39,6 +39,11 @@ public class MoveOrder extends Order {
 		int[] nextStep = Algorithms.moveTowards(us.getKnown(), us.getX(), us.getY(), tx, ty, us);
 		return new MoveAction(nextStep[0], nextStep[1]);
 	}
+	
+	@Override
+	public int expectedCompletionTime(Unit us) {
+		return (Algorithms.kingBFS(us.getKnown(), tx, ty, us)).getDist()[us.getX()][us.getY()];
+	}
 
 	public int getTx() {
 		return tx;

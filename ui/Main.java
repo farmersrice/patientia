@@ -1,5 +1,8 @@
 package ui;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Queue;
 
 import game_manager.GameManager;
@@ -37,6 +40,8 @@ import orders.CreateWorkerOrder;
 import orders.MoveOrder;
 import orders.Order;
 import units.City;
+import units.Farm;
+import units.Mine;
 import units.Soldier;
 import units.Unit;
 import units.Worker;
@@ -86,10 +91,14 @@ public class Main extends Application {
 	Image sbeve = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\sbeve.png");
 	Image swordImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\sword_transparent.png");
 	Image cityImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\city_transparent.png");
+	Image farmImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\farm_transparent_real.png");
+	Image mineImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\mine_transparent.png");
 	
 	boolean shiftPressed = false;
 	
 	ObservableList<String> orderList;
+	
+	GameManager game;
 	
 	//copied from https://stackoverflow.com/questions/35751576/javafx-draw-line-with-arrow-canvas
 	final int arrowSize = 8;
@@ -161,7 +170,7 @@ public class Main extends Application {
 	
 	
 	public void render(GraphicsContext gc, GameManager game, Text t) {
-		GameMap temp = game.getOmnimap();
+		GameMap temp = game.getPlayers()[0].getKnown(); //game.getOmnimap();
 		
 		Tile[][] terrain = temp.getTerrain();//new Tile[mapRows][mapCols];
 		
@@ -214,10 +223,7 @@ public class Main extends Application {
 					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
 					//Highlight selected unit gold
 					
-					orderList.clear();
-					for (Order o : selectedUnit.getOrders()) {
-						orderList.add(o.toString());
-					}
+					updateOrderList();
 				}
 				
 				//System.out.println("drawing img");
@@ -225,12 +231,12 @@ public class Main extends Application {
 					gc.drawImage(cityImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
 				}
 				
+				if (curStaticUnit instanceof Farm) {
+					gc.drawImage(farmImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
+				}
 				
-				if (curStaticUnit == selectedUnit) {
-					if (curStaticUnit instanceof City) {
-						//Add some cute buttons to spawn units and whatnot
-						
-					}
+				if (curStaticUnit instanceof Mine) {
+					gc.drawImage(mineImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
 				}
 			}
 		}
@@ -252,10 +258,7 @@ public class Main extends Application {
 					//Highlight selected unit gold
 					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
 					
-					orderList.clear();
-					for (Order o : selectedUnit.getOrders()) {
-						orderList.add(o.toString());
-					}
+					updateOrderList();
 				}
 				
 				
@@ -304,14 +307,97 @@ public class Main extends Application {
 		}
 		
 		Player us = game.getPlayers()[0];
-		t.setText("Food: " + us.getFood() + '\n' + "Minerals: " + us.getMinerals() + 
-				'\n' + "Wealth: " + us.getWealth());
+		DecimalFormat df = new DecimalFormat("#.##");
+		t.setText("Food: " + df.format(us.getFood()) + '\n' + "Minerals: " + df.format(us.getMinerals()) + 
+				'\n' + "Wealth: " + df.format(us.getWealth()) + '\n' + 
+				"Selected unit: " + (selectedUnit != null ? selectedUnit.toString() : ""));
 		
 		//System.out.println("rerender done");
 	}
 	public void update(GraphicsContext gc, GameManager game, Text t) {
 		game.turn();
 		render(gc, game, t);
+	}
+	
+	public static class TimedOrder implements Comparable<TimedOrder> {
+		int time;
+		Order o;
+		boolean set;
+		boolean receiving;
+		
+		TimedOrder(int t, Order or, boolean s, boolean r) {
+			time = t; o = or; set = s; receiving = r;
+		}
+		
+		public int compareTo(TimedOrder other) {
+			return time - other.time;
+		}
+	}
+	
+	private ArrayList<TimedOrder> getFutureOrderState() {
+		ArrayList<TimedOrder> futureOrderStateUnfiltered = new ArrayList<TimedOrder>();
+		
+		for (OutstandingOrder o : game.getOutstandingOrders()) {
+			futureOrderStateUnfiltered.add(new TimedOrder(o.getTimeIssued() + game.getLag(selectedUnit) - game.getTurnCounter(),
+					o.getOrder(), o.isSet(), true));
+		}
+		
+		int lastX = selectedUnit.getX();
+		int lastY = selectedUnit.getY();
+		int currentCompletionTime = 0;
+		for (Order o : selectedUnit.getOrders()) {
+			if (o instanceof MoveOrder) {
+				currentCompletionTime += (Algorithms.kingBFS(selectedUnit.getKnown(), ((MoveOrder) o).getTx(), 
+						((MoveOrder) o).getTy(), selectedUnit)).getDist()[lastX][lastY];
+				
+				lastX = ((MoveOrder) o).getTx();
+				lastY = ((MoveOrder) o).getTy();
+			} else {
+				currentCompletionTime += o.expectedCompletionTime(selectedUnit);
+			}
+			
+			futureOrderStateUnfiltered.add(new TimedOrder(currentCompletionTime, o, false, false));
+		}
+		
+		Collections.sort(futureOrderStateUnfiltered);
+		
+		ArrayList<TimedOrder> futureOrderState = new ArrayList<TimedOrder>();
+		
+		
+		boolean erased = false;
+		for (TimedOrder next : futureOrderStateUnfiltered) {
+			if (next.set) erased = true;
+			
+			if (!next.receiving && erased) {
+				//Remove it and do nothing
+			} else {
+				futureOrderState.add(next);
+			}
+			
+			
+		}
+		
+		
+		return futureOrderState;
+	}
+	
+	private void updateOrderList() {
+		if (selectedUnit == null) return;
+		
+		orderList.clear();
+		
+		ArrayList<TimedOrder> futureOrderState = getFutureOrderState();
+
+		for (TimedOrder t : futureOrderState) {
+			if (t.receiving) {
+				//Will come in the future, put  est. time
+				orderList.add(t.o.toString() + " (est. arrival: " + t.time + ", " + (t.set ? "set" : "add") + ")" );
+			} else {
+				//We already have this, also put est. time
+				orderList.add(t.o.toString() + " (est. completion: " + t.time + ")");
+			}
+		}
+		
 	}
 	
 	@Override
@@ -371,7 +457,7 @@ public class Main extends Application {
 		final Canvas canvas = new Canvas(canvasDimensionX, canvasDimensionY);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		
-		GameManager game = new GameManager(mapRows, mapCols, numPlayers);
+		game = new GameManager(mapRows, mapCols, numPlayers);
 		
 		root.getChildren().add(canvas);
 		
@@ -381,26 +467,30 @@ public class Main extends Application {
 		info.getChildren().add(testingText);
 		
 		Button createSoldierButton = new Button("Create soldier");
-		createSoldierButton.setOnAction(e -> {
+		createSoldierButton.setOnMouseClicked(e -> {
 			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new CreateSoldierOrder(1), !shiftPressed));
+			updateOrderList();
 		});
 		Button createWorkerButton = new Button("Create worker");
-		createWorkerButton.setOnAction(e -> {
+		createWorkerButton.setOnMouseClicked(e -> {
 			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new CreateWorkerOrder(), !shiftPressed));
+			updateOrderList();
 		});
 		
 		Button buildFarmButton = new Button("Build farm");
-		buildFarmButton.setOnAction(e -> {
-			System.out.println("buton clickd");
+		buildFarmButton.setOnMouseClicked(e -> {
 			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new BuildFarmOrder(), !shiftPressed));
+			updateOrderList();
 		});
 		Button buildCityButton = new Button("Build city");
-		buildCityButton.setOnAction(e -> {
+		buildCityButton.setOnMouseClicked(e -> {
 			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new BuildCityOrder(), !shiftPressed));
+			updateOrderList();
 		});
 		Button buildMineButton = new Button("Build mine");
-		buildMineButton.setOnAction(e -> {
+		buildMineButton.setOnMouseClicked(e -> {
 			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new BuildMineOrder(), !shiftPressed));
+			updateOrderList();
 		});
 		
 		
@@ -458,10 +548,7 @@ public class Main extends Application {
 							
 							//Modify the orderList to give us the right names that we want
 							
-							orderList.clear();
-							for (Order o : selectedUnit.getOrders()) {
-								orderList.add(o.toString());
-							}
+							updateOrderList();
 							
 							//Remove all buttons from the system
 							orderBox.getChildren().remove(createWorkerButton);
@@ -494,13 +581,12 @@ public class Main extends Application {
 						render(gc, game, testingText);
 					}
 					
-					testingText.setText(testingText.getText() + (selectedUnit != null ? "\nselected unit " + selectedUnit.getId() : ""));
+					//testingText.setText(testingText.getText() + (selectedUnit != null ? "\nselected unit " + selectedUnit.getId() : ""));
 					//game.getOmnimap().getMobileUnits()[clickedRow][clickedCol] = new Soldier(0, 1, 1, 1, null, 1, 1, 1);
 					
 				});
 		
 		canvas.setOnScroll(e -> {
-			System.out.println("detected scroll " + e.getDeltaY());
 			
 			boolean neg = e.getDeltaY() < 0;
 			if (!neg) {
@@ -513,7 +599,6 @@ public class Main extends Application {
 			
 			zoom = Math.max(1, Math.min(10, zoom));
 			
-			System.out.println("zoom is now " + zoom);
 			
 			render(gc, game, testingText);
 		});

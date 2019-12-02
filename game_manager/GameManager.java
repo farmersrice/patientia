@@ -74,6 +74,25 @@ public class GameManager {
 	public void setTurnCounter(int turnCounter) {
 		this.turnCounter = turnCounter;
 	}
+	
+	public int getLag(Unit us) {
+		int shortestDistance = Integer.MAX_VALUE;
+		
+		for (int i = 0; i < omnimap.getR(); i++) {
+			for (int j = 0; j < omnimap.getC(); j++) {
+				Unit temp = omnimap.getStaticUnits()[i][j];
+				
+				if (temp != null && temp.isValid() && temp.getTeam() == us.getTeam() && temp instanceof City) {
+					int dx = us.getX() - temp.getX();
+					int dy = us.getY() - temp.getY();
+					shortestDistance = Math.min(shortestDistance, dx * dx + dy * dy);
+				}
+			}
+		}
+		int backTurns = (int) Math.floor(Math.sqrt(shortestDistance) / COMMUNICATION_SPEED);
+		
+		return backTurns;
+	}
 
 	public void turn() {
 		ArrayList<Unit> order = new ArrayList<Unit>();
@@ -114,7 +133,7 @@ public class GameManager {
 			
 			int shortestDistance = Integer.MAX_VALUE;
 			
-			for (Unit v : order) {
+			for (Unit v : order) { //don't use getLag here since probably less units than tiles
 				if (!v.isValid() || v.getTeam() != u.getTeam() || !(v instanceof City)) continue;
 				
 				//We know it's one of our cities
@@ -132,6 +151,7 @@ public class GameManager {
 			
 			GameMap uKnownClone = u.getKnown().clone();
 			uKnownClone.setUpdateTime(turnCounter + backTurns);
+			System.out.println("adding new map update " + backTurns);
 			playerKnownUpdateQueues[u.getTeam()].add(uKnownClone);
 			
 			
@@ -145,6 +165,7 @@ public class GameManager {
 						u.addOrder(o.getOrder());
 					}
 					
+					System.out.println("processed order " + o.getTarget().getId() + " " + o.getOrder().toString());
 					o.setDone(true);
 				}
 			}
@@ -154,6 +175,9 @@ public class GameManager {
 		for (OutstandingOrder o : outstandingOrders) {
 			if (!o.isDone() && o.getTarget().isValid()) {
 				filtered.add(o);
+			} else {
+				System.out.println("Deleting order, irrelevant " + o.getTarget().getId() + " " + o.getOrder().toString());
+				System.out.println("validity " + o.getTarget().isValid());
 			}
 		}
 		outstandingOrders = filtered;
@@ -174,6 +198,7 @@ public class GameManager {
 		for (Unit u : order) {
 			if (u.isValid()) {
 				u.processPassiveEffects(this);
+				System.out.println("processing action " + u.getAction().getClass().getName());
 				u.getAction().execute(u, this);
 			}
 		}
@@ -181,6 +206,14 @@ public class GameManager {
 		turnCounter++;
 	}
 	
+	public ArrayList<OutstandingOrder> getOutstandingOrders() {
+		return outstandingOrders;
+	}
+
+	public void setOutstandingOrders(ArrayList<OutstandingOrder> outstandingOrders) {
+		this.outstandingOrders = outstandingOrders;
+	}
+
 	private Unit findUnit(String s) {
 		int id = 0;
 		

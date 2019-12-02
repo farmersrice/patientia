@@ -28,11 +28,11 @@ public class Algorithms {
 			dist = d; par = p;
 		}
 		
-		int[][] getDist() {
+		public int[][] getDist() {
 			return dist;
 		}
 		
-		int[][][] getPar() {
+		public int[][][] getPar() {
 			return par;
 		}
 	}

@@ -17,4 +17,8 @@ public class Farm extends StaticUnit {
 		Player owner = m.getPlayers()[getTeam()];
 		owner.setFood(owner.getFood() + owner.getFoodMultiplier());
 	}
+	
+	public String toString() {
+		return "Farm";
+	}
 }

@@ -1,5 +1,7 @@
 package units;
 
+import java.text.DecimalFormat;
+
 import game_manager.GameManager;
 import game_manager.Player;
 import game_map.GameMap;
@@ -39,4 +41,7 @@ public class City extends StaticUnit {
 		owner.setWealth(owner.getWealth() + population * owner.getWealthMultiplier() * (populationControlsEnacted ? 0.5 : 1));
 	}
 
+	public String toString() {
+		return "City, pop. " +  new DecimalFormat("#.##").format(population) + ", pop controls: " + populationControlsEnacted;
+	}
 }

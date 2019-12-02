@@ -17,5 +17,9 @@ public class Mine extends StaticUnit {
 		Player owner = m.getPlayers()[getTeam()];
 		owner.setMinerals(owner.getMinerals() + owner.getMineralsMultiplier());
 	}
+	
+	public String toString() {
+		return "Mine";
+	}
 
 }

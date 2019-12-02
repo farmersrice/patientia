@@ -1,5 +1,7 @@
 package units;
 
+import java.text.DecimalFormat;
+
 import game_manager.GameManager;
 import game_manager.Player;
 import game_map.GameMap;
@@ -76,5 +78,9 @@ public class Soldier extends MobileUnit {
 		owner.setFood(owner.getFood() - 2 * soldiers);
 		owner.setWealth(owner.getWealth() - soldiers);
 		
+	}
+	
+	public String toString() {
+		return "Soldiers, count: " + new DecimalFormat("#.##").format(soldiers) + ", xp: " + new DecimalFormat("#.##").format(experience);
 	}
 }

@@ -284,6 +284,10 @@ public class GameMap implements Cloneable {
 				if (other[i][j] != null && other[i][j].isValid() && otherLastUpdated[i][j] == latestSeen.get(other[i][j])) {
 					us[i][j] = other[i][j];
 				}
+				
+				if (otherLastUpdated[i][j] > usLastUpdated[i][j]) {
+					us[i][j] = other[i][j];
+				}
 			}
 		}
 	}
@@ -305,6 +309,12 @@ public class GameMap implements Cloneable {
 
 		updateUnits(mobileUnits, other.mobileUnits, lastUpdated, other.lastUpdated);
 		updateUnits(staticUnits, other.staticUnits, lastUpdated, other.lastUpdated);
+		
+		for (int i = 0; i < r; i++) {
+			for (int j = 0; j < c; j++) {
+				lastUpdated[i][j] = Math.max(lastUpdated[i][j], other.lastUpdated[i][j]);
+			}
+		}
 	}
 
 	

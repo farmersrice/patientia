@@ -21,4 +21,7 @@ public class Worker extends MobileUnit {
 		
 	}
 	
+	public String toString() {
+		return "Worker";
+	}
 }
