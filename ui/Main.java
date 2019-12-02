@@ -510,8 +510,8 @@ public class Main extends Application {
 						
 						if (event.getButton() != MouseButton.SECONDARY) {
 							//Selecting a unit
-							Unit mobileOnClick = game.getOmnimap().getMobileUnits()[clickedRow][clickedCol];
-							Unit staticOnClick = game.getOmnimap().getStaticUnits()[clickedRow][clickedCol];
+							Unit mobileOnClick = game.getPlayers()[0].getKnown().getMobileUnits()[clickedRow][clickedCol];
+							Unit staticOnClick = game.getPlayers()[0].getKnown().getStaticUnits()[clickedRow][clickedCol];
 
 							
 							if (selectedUnit == null) {

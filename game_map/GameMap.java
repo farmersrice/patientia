@@ -319,12 +319,17 @@ public class GameMap implements Cloneable {
 
 	
 	public GameMap clone() {
-		try {
-			return (GameMap) super.clone();
-		} catch (Exception e) {
-			System.out.println("bad clone");
-			e.printStackTrace();
-			return null;
+		GameMap result = new GameMap(r, c);
+
+		for (int i = 0; i < r; i++) {
+			for (int j = 0; j < c; j++) {
+				result.terrain[i][j] = terrain[i][j];
+				result.mobileUnits[i][j] = mobileUnits[i][j];
+				result.staticUnits[i][j] = staticUnits[i][j];
+				result.lastUpdated[i][j] = lastUpdated[i][j];
+			}
 		}
+	
+		return result;
 	}
 }
