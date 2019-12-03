@@ -94,6 +94,28 @@ public class GameManager {
 		return backTurns;
 	}
 
+	public int getLag(Unit u, ArrayList<Unit> order) {
+		//Check the distance to the nearest city, and update with latest available map of the player
+		
+		//How long does this take in total? Number of units squared, which should be OK, even if people have like 2000 units
+		//it should take < 1 second
+		
+		int shortestDistance = Integer.MAX_VALUE;
+		
+		for (Unit v : order) { //don't use getLag here since probably less units than tiles
+			if (!v.isValid() || v.getTeam() != u.getTeam() || !(v instanceof City)) continue;
+			
+			//We know it's one of our cities
+			int dx = u.getX() - v.getX();
+			int dy = u.getY() - v.getY();
+			shortestDistance = Math.min(shortestDistance, dx * dx + dy * dy);
+		}
+		
+		int backTurns = (int) Math.floor(Math.sqrt(shortestDistance) / COMMUNICATION_SPEED);
+		
+		return backTurns;
+	}
+	
 	public void turn() {
 		ArrayList<Unit> order = new ArrayList<Unit>();
 		
@@ -116,23 +138,7 @@ public class GameManager {
 		for (Unit u : order) {
 			if (!u.isValid()) continue;
 			
-			//Check the distance to the nearest city, and update with latest available map of the player
-			
-			//How long does this take in total? Number of units squared, which should be OK, even if people have like 2000 units
-			//it should take < 1 second
-			
-			int shortestDistance = Integer.MAX_VALUE;
-			
-			for (Unit v : order) { //don't use getLag here since probably less units than tiles
-				if (!v.isValid() || v.getTeam() != u.getTeam() || !(v instanceof City)) continue;
-				
-				//We know it's one of our cities
-				int dx = u.getX() - v.getX();
-				int dy = u.getY() - v.getY();
-				shortestDistance = Math.min(shortestDistance, dx * dx + dy * dy);
-			}
-			
-			int backTurns = (int) Math.floor(Math.sqrt(shortestDistance) / COMMUNICATION_SPEED);
+			int backTurns = getLag(u, order);
 			
 			//Check if we can update any outstanding orders
 			for (OutstandingOrder o : outstandingOrders) {
@@ -178,21 +184,9 @@ public class GameManager {
 			
 			u.getKnown().updateKnowledge(omnimap.slice(u.getX(), u.getY(), 2, turnCounter));
 			
-			int shortestDistance = Integer.MAX_VALUE;
-			
-			for (Unit v : order) { //don't use getLag here since probably less units than tiles
-				if (!v.isValid() || v.getTeam() != u.getTeam() || !(v instanceof City)) continue;
-				
-				//We know it's one of our cities
-				int dx = u.getX() - v.getX();
-				int dy = u.getY() - v.getY();
-				shortestDistance = Math.min(shortestDistance, dx * dx + dy * dy);
-			}
-			
-			int backTurns = (int) Math.floor(Math.sqrt(shortestDistance) / COMMUNICATION_SPEED);
+			int backTurns = getLag(u, order);
 			
 			u.getKnown().updateKnowledge(players[u.getTeam()].getPrevKnown(backTurns));
-			
 			
 			//Update the player by adding our map to the player update queue
 			

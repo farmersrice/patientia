@@ -6,6 +6,8 @@ import java.util.Queue;
 import actions.Action;
 import actions.DoNothingAction;
 import game_manager.GameManager;
+import game_manager.Player;
+import game_manager.ResourceDelta;
 import game_map.GameMap;
 import orders.LoopOrder;
 import orders.Order;
@@ -18,7 +20,12 @@ public abstract class Unit {
 	private Queue<Order> currentOrders = new LinkedList<Order>();
 	private boolean looping = false;
 	
-	public abstract void processPassiveEffects(GameManager m);
+	public void processPassiveEffects(GameManager m) {
+		if (getTeam() > m.getNumPlayers()) return;
+		
+		Player owner = m.getPlayers()[getTeam()];
+		getResourceDelta(owner).apply(owner);
+	}
 	
 	public Unit(int team, int id, int i, int j, GameMap k) {
 		x = i; y = j; this.team = team; this.id = id; known = k;
@@ -40,6 +47,8 @@ public abstract class Unit {
 	public String toString() {
 		return team + " " + id + " " + x + " " + y;
 	}
+	
+	public abstract ResourceDelta getResourceDelta(Player owner); //pass the owner since resource deficits do stuff
 	
 	public Action getAction() {
 		while (currentOrders.size() > 0 && currentOrders.peek().isComplete(this)) {

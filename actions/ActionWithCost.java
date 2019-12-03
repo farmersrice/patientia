@@ -16,8 +16,9 @@ public abstract class ActionWithCost extends Action {
 		if (us.getTeam() >= m.getNumPlayers()) return false;
 		Player owner = m.getPlayers()[us.getTeam()];
 		
-		if (owner.getWealth() < requiredWealth || owner.getMinerals() < requiredMinerals 
-				|| owner.getFood() < requiredFood) return false;
+		if ((requiredWealth > 0 && owner.getWealth() < requiredWealth) || 
+				(requiredMinerals > 0 && owner.getMinerals() < requiredMinerals) 
+				|| (requiredFood > 0 && owner.getFood() < requiredFood)) return false;
 
 		return true;
 	}

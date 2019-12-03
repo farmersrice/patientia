@@ -2,6 +2,7 @@ package units;
 
 import game_manager.GameManager;
 import game_manager.Player;
+import game_manager.ResourceDelta;
 import game_map.GameMap;
 
 public class Mine extends StaticUnit {
@@ -10,16 +11,13 @@ public class Mine extends StaticUnit {
 		super(team, id, i, j, k);
 	}
 
-	@Override
-	public void processPassiveEffects(GameManager m) {
-		if (getTeam() > m.getNumPlayers()) return; //we can do this in order to place unowned farms around the map, for example
-		
-		Player owner = m.getPlayers()[getTeam()];
-		owner.setMinerals(owner.getMinerals() + owner.getMineralsMultiplier());
-	}
-	
 	public String toString() {
 		return "Mine";
+	}
+
+	@Override
+	public ResourceDelta getResourceDelta(Player owner) {
+		return new ResourceDelta(0, owner.getMineralsMultiplier(), 0);
 	}
 
 }

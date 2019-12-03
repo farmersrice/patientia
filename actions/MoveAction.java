@@ -61,6 +61,7 @@ public class MoveAction extends Action {
 		MobileUnit occupant = mobileUnits[tx][ty];
 		
 		if (occupant == null || !occupant.isValid() || !(occupant instanceof Soldier)) {
+			if (occupant != null) occupant.setValid(false);
 			known.getMobileUnits()[tx][ty] = (MobileUnit) us;
 			known.getMobileUnits()[us.getX()][us.getY()] = null;
 			us.setX(tx); us.setY(ty);

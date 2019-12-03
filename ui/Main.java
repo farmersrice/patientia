@@ -8,6 +8,7 @@ import java.util.Queue;
 import game_manager.GameManager;
 import game_manager.OutstandingOrder;
 import game_manager.Player;
+import game_manager.ResourceDelta;
 import game_map.GameMap;
 import game_map.Tile;
 import javafx.application.Application;
@@ -79,7 +80,7 @@ public class Main extends Application {
 	final int scalingFactor = 10;
 	final int mapRows = 100;
 	final int mapCols = 60;
-	final int numPlayers = 1;
+	final int numPlayers = 4;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
 	double cameraX = mapRows / 2.0;
@@ -100,9 +101,15 @@ public class Main extends Application {
 	
 	GameManager game;
 	
+
+	final Color[] PLAYER_COLORS = {Color.rgb(255, 255, 255, 0.4), Color.rgb(255, 0, 0, 0.4), 
+			Color.rgb(0, 255, 0, 0.4), Color.rgb(0, 0, 255, 0.4)};
+
+	
 	//copied from https://stackoverflow.com/questions/35751576/javafx-draw-line-with-arrow-canvas
 	final int arrowSize = 8;
 	
+		
 	void drawArrow(GraphicsContext gc, double x1, double y1, double x2, double y2) {
 	    gc.setFill(Color.WHITE);
 	    gc.setStroke(Color.WHITE);
@@ -170,7 +177,7 @@ public class Main extends Application {
 	
 	
 	public void render(GraphicsContext gc, GameManager game, Text t) {
-		GameMap temp = game.getPlayers()[0].getKnown(); //game.getOmnimap();
+		GameMap temp = game.getOmnimap();//game.getPlayers()[0].getKnown(); //game.getOmnimap();
 		
 		Tile[][] terrain = temp.getTerrain();//new Tile[mapRows][mapCols];
 		
@@ -238,6 +245,11 @@ public class Main extends Application {
 				if (curStaticUnit instanceof Mine) {
 					gc.drawImage(mineImage, screenPos[0], screenPos[1], totalScaling, totalScaling);
 				}
+				
+				if (curStaticUnit != selectedUnit) {
+					gc.setFill(PLAYER_COLORS[curStaticUnit.getTeam() % PLAYER_COLORS.length]);
+					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
+				}
 			}
 		}
 		
@@ -262,9 +274,6 @@ public class Main extends Application {
 				}
 				
 				
-				
-
-
 				if (curMobileUnit instanceof Worker) {
 					if (!(curMobileUnit != selectedUnit && selectedUnit != null && curMobileUnit.getX() == selectedUnit.getX() && 
 							curMobileUnit.getY() == selectedUnit.getY())) 
@@ -303,14 +312,41 @@ public class Main extends Application {
 						}
 					}
 				}
+				
+				if (curMobileUnit != selectedUnit) {
+					gc.setFill(PLAYER_COLORS[curMobileUnit.getTeam() % PLAYER_COLORS.length]);
+					gc.fillRect(screenPos[0], screenPos[1], totalScaling, totalScaling);
+				}
 			}
 		}
 		
+		//Calculate the expected deltas now
+		ResourceDelta thisTurnDelta = new ResourceDelta(0, 0, 0);
+		
+		for (int i = 0; i < mapRows; i++) {
+			for (int j = 0; j < mapCols; j++) {
+				Unit occupant = temp.getMobileUnits()[i][j];
+				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
+					thisTurnDelta.add(occupant.getResourceDelta(game.getPlayers()[0]));
+				}
+
+				occupant = temp.getStaticUnits()[i][j];
+				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
+					thisTurnDelta.add(occupant.getResourceDelta(game.getPlayers()[0]));
+				}
+			}
+		}
+		
+		double delf = thisTurnDelta.getFood();
+		double delm = thisTurnDelta.getMinerals();
+		double delw = thisTurnDelta.getWealth();
+		
 		Player us = game.getPlayers()[0];
 		DecimalFormat df = new DecimalFormat("#.##");
-		t.setText("Food: " + df.format(us.getFood()) + '\n' + "Minerals: " + df.format(us.getMinerals()) + 
-				'\n' + "Wealth: " + df.format(us.getWealth()) + '\n' + 
-				"Selected unit: " + (selectedUnit != null ? selectedUnit.toString() : ""));
+		t.setText("Food: " + df.format(us.getFood()) + " (" + (delf > 0 ? "+" : "") + df.format(delf) + ")" + '\n' 
+				+ "Minerals: " + df.format(us.getMinerals()) + " (" + (delm > 0 ? "+" : "") + df.format(delm) + ")" + '\n' 
+				+ "Wealth: " + df.format(us.getWealth()) + " (" + (delw > 0 ? "+" : "") + df.format(delw) + ")" + '\n' + 
+				"Selected unit: " + (selectedUnit != null ? selectedUnit.toString() + "\nTeam: " + selectedUnit.getTeam() : ""));
 		
 		//System.out.println("rerender done");
 	}
@@ -512,8 +548,12 @@ public class Main extends Application {
 						
 						if (event.getButton() != MouseButton.SECONDARY) {
 							//Selecting a unit
-							Unit mobileOnClick = game.getPlayers()[0].getKnown().getMobileUnits()[clickedRow][clickedCol];
-							Unit staticOnClick = game.getPlayers()[0].getKnown().getStaticUnits()[clickedRow][clickedCol];
+							//Unit mobileOnClick = game.getPlayers()[0].getKnown().getMobileUnits()[clickedRow][clickedCol];
+							//Unit staticOnClick = game.getPlayers()[0].getKnown().getStaticUnits()[clickedRow][clickedCol];
+							
+							//Omnipresent selection for debug purposes
+							Unit mobileOnClick = game.getOmnimap().getMobileUnits()[clickedRow][clickedCol];
+							Unit staticOnClick = game.getOmnimap().getStaticUnits()[clickedRow][clickedCol];
 
 							
 							if (selectedUnit == null) {
@@ -534,6 +574,11 @@ public class Main extends Application {
 										selectedUnit = mobileOnClick;
 									}
 								}
+							}
+							
+							//Check player team
+							if (selectedUnit != null && selectedUnit.getTeam() != 0) {
+								selectedUnit = null;
 							}
 						} else {
 							//Move order!
@@ -649,12 +694,6 @@ public class Main extends Application {
 		turnButtonBox.setAlignment(Pos.BOTTOM_CENTER);
 		turnButtonBox.getChildren().add(turnButton);
 		infoPane.setBottom(turnButtonBox);
-		
-		
-		//turnButton.setTranslateX(mapRows * scalingFactor + 10);
-		//turnButton.setTranslateY(mapCols * scalingFactor + 10);
-		//root.getChildren().add(turnButton);
-		
 		
 		
 

@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 
 import game_manager.GameManager;
 import game_manager.Player;
+import game_manager.ResourceDelta;
 import game_map.GameMap;
 
 public class City extends StaticUnit {
@@ -32,16 +33,20 @@ public class City extends StaticUnit {
 	}
 
 	public void processPassiveEffects(GameManager m) {
-		if (!populationControlsEnacted) population *= 1.05;
-		
 		if (getTeam() > m.getNumPlayers()) return;
-		
+	
 		Player owner = m.getPlayers()[getTeam()];
-		owner.setFood(owner.getFood() - population * (populationControlsEnacted ? 2 : 1));
-		owner.setWealth(owner.getWealth() + population * owner.getWealthMultiplier() * (populationControlsEnacted ? 0.5 : 1));
+		getResourceDelta(owner).apply(owner);
+		
+		if (!populationControlsEnacted) population *= 1.05;
 	}
 
 	public String toString() {
 		return "City, pop. " +  new DecimalFormat("#.##").format(population) + ", pop controls: " + populationControlsEnacted;
+	}
+
+	@Override
+	public ResourceDelta getResourceDelta(Player owner) {
+		return new ResourceDelta(-population * (populationControlsEnacted ? 2 : 1), 0, population * owner.getWealthMultiplier() * (populationControlsEnacted ? 0.5 : 1));
 	}
 }

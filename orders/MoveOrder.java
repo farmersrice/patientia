@@ -3,6 +3,11 @@ package orders;
 import actions.Action;
 import actions.DoNothingAction;
 import actions.MoveAction;
+import game_map.GameMap;
+import game_map.Tile;
+import units.MobileUnit;
+import units.Soldier;
+import units.StaticUnit;
 import units.Unit;
 import utilities.Algorithms;
 
@@ -24,10 +29,25 @@ public class MoveOrder extends Order {
 		int[] nextStep = Algorithms.moveTowards(us.getKnown(), us.getX(), us.getY(), tx, ty, us);
 		if (nextStep[0] == -1) curComplete = true;
 		
-		if (nextStep[0] != -1) { 
-			Unit occupant = us.getKnown().getMobileUnits()[nextStep[0]][nextStep[1]];
+		if (nextStep[0] != -1) {
 			
-			if (occupant != null && occupant.isValid()) curComplete = true;
+			//Copy logic from the MoveAction since we aren't allowed to know about the omnipresent game map
+			
+			GameMap known = us.getKnown();
+			
+			if (us instanceof StaticUnit) curComplete = true; //we cant move lmao
+			if (!Algorithms.isValidCoordinate(nextStep[0], nextStep[1], known.getR(), known.getC())) curComplete = true;
+			
+			MobileUnit[][] mobileUnits = known.getMobileUnits();
+			
+			//if (mobileUnits[tx][ty] != null && mobileUnits[tx][ty].getId() != us.getId()) return false;
+			
+			MobileUnit occupant = mobileUnits[nextStep[0]][nextStep[1]];
+			
+			if (!(Algorithms.isNeighborKing(us.getX(), us.getY(), nextStep[0], nextStep[1]) && 
+					known.getTerrain()[nextStep[0]][nextStep[1]] != Tile.BLOCKED 
+					&& (occupant == null || !occupant.isValid() || (us instanceof Soldier && occupant.getTeam() != us.getTeam()))))
+					curComplete = true;
 		}
 		
 		setComplete(curComplete); //so we don't spam compute moveTowards
