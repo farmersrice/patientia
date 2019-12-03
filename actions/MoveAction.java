@@ -41,13 +41,12 @@ public class MoveAction extends Action {
 		
 		MobileUnit[][] mobileUnits = known.getMobileUnits();
 		
-		if (mobileUnits[tx][ty] != null && mobileUnits[tx][ty].getId() != us.getId()) return false;
+		//if (mobileUnits[tx][ty] != null && mobileUnits[tx][ty].getId() != us.getId()) return false;
 		
 		MobileUnit occupant = mobileUnits[tx][ty];
 		
 		return Algorithms.isNeighborKing(us.getX(), us.getY(), tx, ty) && known.getTerrain()[tx][ty] != Tile.BLOCKED 
-				&& (occupant == null || !occupant.isValid() || (us instanceof Soldier && occupant.getTeam() != us.getTeam())
-				|| (us instanceof Soldier && occupant instanceof Soldier && occupant.getTeam() == us.getTeam()));
+				&& (occupant == null || !occupant.isValid() || (us instanceof Soldier && occupant.getTeam() != us.getTeam()));
 		
 	}
 
@@ -66,16 +65,24 @@ public class MoveAction extends Action {
 			known.getMobileUnits()[us.getX()][us.getY()] = null;
 			us.setX(tx); us.setY(ty);
 		} else if (occupant instanceof Soldier) {
-			if (occupant.getTeam() == us.getTeam() && us instanceof Soldier) {
-				//Merge into them (delete ourselves)
-				((Soldier)us).mergeInto((Soldier)occupant);
-			} else {
-				//Conquer them
-				double strengthUs = ((Soldier)us).getStrength();
-				double strengthOther = ((Soldier)occupant).getStrength();
-				((Soldier)us).takeDamage(strengthOther);
-				((Soldier)occupant).takeDamage(strengthUs);
+			//Conquer them
+			double strengthUs = ((Soldier)us).getStrength();
+			double strengthOther = ((Soldier)occupant).getStrength();
+			((Soldier)us).takeDamage(strengthOther);
+			((Soldier)occupant).takeDamage(strengthUs);
+			
+			if (us.isValid() && !occupant.isValid()) {
+				known.getMobileUnits()[tx][ty] = (MobileUnit) us;
+				known.getMobileUnits()[us.getX()][us.getY()] = null;
+				us.setX(tx); us.setY(ty);
+			} else if (!occupant.isValid()) {
+				mobileUnits[tx][ty] = null;
 			}
+			
+			if (!us.isValid()) {
+				mobileUnits[us.getX()][us.getY()] = null;
+			} 
+			
 		}
 		
 		//Set the static unit to ours (conquering city, farm, mine)

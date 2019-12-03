@@ -23,7 +23,13 @@ public class MoveOrder extends Order {
 		
 		int[] nextStep = Algorithms.moveTowards(us.getKnown(), us.getX(), us.getY(), tx, ty, us);
 		if (nextStep[0] == -1) curComplete = true;
-
+		
+		if (nextStep[0] != -1) { 
+			Unit occupant = us.getKnown().getMobileUnits()[nextStep[0]][nextStep[1]];
+			
+			if (occupant != null && occupant.isValid()) curComplete = true;
+		}
+		
 		setComplete(curComplete); //so we don't spam compute moveTowards
 		return curComplete;
 	}
