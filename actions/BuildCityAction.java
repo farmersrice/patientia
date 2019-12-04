@@ -23,6 +23,7 @@ public class BuildCityAction extends BuildStaticUnitAction {
 		known.getStaticUnits()[us.getX()][us.getY()] = 
 				new City(us.getTeam(), m.getCurrentUnitCounter(), us.getX(), us.getY(), us.getKnown().clone());
 		
+		m.setCurrentUnitCounter(m.getCurrentUnitCounter() + 1);
 		//Consume the worker
 		known.getMobileUnits()[us.getX()][us.getY()] = null;
 		us.setValid(false);

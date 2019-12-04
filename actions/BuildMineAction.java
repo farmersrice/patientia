@@ -27,5 +27,6 @@ public class BuildMineAction extends BuildStaticUnitAction {
 		GameMap known = m.getOmnimap();
 		known.getStaticUnits()[us.getX()][us.getY()] = 
 				new Mine(us.getTeam(), m.getCurrentUnitCounter(), us.getX(), us.getY(), us.getKnown().clone());
+		m.setCurrentUnitCounter(m.getCurrentUnitCounter() + 1);
 	}
 }

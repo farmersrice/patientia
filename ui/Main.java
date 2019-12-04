@@ -78,8 +78,8 @@ public class Main extends Application {
 	//be changeable.
 	
 	final int scalingFactor = 10;
-	final int mapRows = 100;
-	final int mapCols = 60;
+	final int mapRows = 50;
+	final int mapCols = 30;
 	final int numPlayers = 4;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
@@ -177,7 +177,8 @@ public class Main extends Application {
 	
 	
 	public void render(GraphicsContext gc, GameManager game, Text t) {
-		GameMap temp = game.getOmnimap();//game.getPlayers()[0].getKnown(); //game.getOmnimap();
+		//GameMap temp = game.getOmnimap();//game.getPlayers()[0].getKnown(); //game.getOmnimap();
+		GameMap temp = game.getPlayers()[0].getKnown();
 		
 		Tile[][] terrain = temp.getTerrain();//new Tile[mapRows][mapCols];
 		
@@ -537,8 +538,7 @@ public class Main extends Application {
 					
 					if (!event.isStillSincePress()) return;
 					
-					
-					int[] scrpos = screenToCell(event.getSceneX(), event.getSceneY());
+					int[] scrpos = screenToCell(event.getX(), event.getY());
 					int clickedRow = scrpos[0];
 					int clickedCol = scrpos[1];
 					
@@ -548,12 +548,12 @@ public class Main extends Application {
 						
 						if (event.getButton() != MouseButton.SECONDARY) {
 							//Selecting a unit
-							//Unit mobileOnClick = game.getPlayers()[0].getKnown().getMobileUnits()[clickedRow][clickedCol];
-							//Unit staticOnClick = game.getPlayers()[0].getKnown().getStaticUnits()[clickedRow][clickedCol];
+							Unit mobileOnClick = game.getPlayers()[0].getKnown().getMobileUnits()[clickedRow][clickedCol];
+							Unit staticOnClick = game.getPlayers()[0].getKnown().getStaticUnits()[clickedRow][clickedCol];
 							
 							//Omnipresent selection for debug purposes
-							Unit mobileOnClick = game.getOmnimap().getMobileUnits()[clickedRow][clickedCol];
-							Unit staticOnClick = game.getOmnimap().getStaticUnits()[clickedRow][clickedCol];
+							//Unit mobileOnClick = game.getOmnimap().getMobileUnits()[clickedRow][clickedCol];
+							//Unit staticOnClick = game.getOmnimap().getStaticUnits()[clickedRow][clickedCol];
 
 							
 							if (selectedUnit == null) {
@@ -575,21 +575,23 @@ public class Main extends Application {
 									}
 								}
 							}
-							
-							//Check player team
-							if (selectedUnit != null && selectedUnit.getTeam() != 0) {
-								selectedUnit = null;
-							}
 						} else {
 							//Move order!
-							if (selectedUnit != null) {
+							if (selectedUnit != null && selectedUnit.getTeam() == 0) {
 								Order o = new MoveOrder(clickedRow, clickedCol);
 								
 								game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), o, !shiftPressed));
 							}
 						}
 						
-						if (selectedUnit != null) {
+						//Remove all buttons from the system
+						orderBox.getChildren().remove(createWorkerButton);
+						orderBox.getChildren().remove(createSoldierButton);
+						orderBox.getChildren().remove(buildFarmButton);
+						orderBox.getChildren().remove(buildMineButton);
+						orderBox.getChildren().remove(buildCityButton);
+						
+						if (selectedUnit != null && selectedUnit.getTeam() == 0) {
 							selectedUnitOrdersText.setVisible(true);
 							orderListView.setVisible(true);
 							
@@ -597,12 +599,6 @@ public class Main extends Application {
 							
 							updateOrderList();
 							
-							//Remove all buttons from the system
-							orderBox.getChildren().remove(createWorkerButton);
-							orderBox.getChildren().remove(createSoldierButton);
-							orderBox.getChildren().remove(buildFarmButton);
-							orderBox.getChildren().remove(buildMineButton);
-							orderBox.getChildren().remove(buildCityButton);
 							
 							if (selectedUnit instanceof City) {
 								//Add creation buttons
@@ -616,14 +612,6 @@ public class Main extends Application {
 						} else {
 							selectedUnitOrdersText.setVisible(false);
 							orderListView.setVisible(false);
-
-							//Remove all buttons from the system
-							orderBox.getChildren().remove(createWorkerButton);
-							orderBox.getChildren().remove(createSoldierButton);
-							orderBox.getChildren().remove(buildFarmButton);
-							orderBox.getChildren().remove(buildMineButton);
-							orderBox.getChildren().remove(buildCityButton);
-							
 						}
 						render(gc, game, testingText);
 					}
@@ -653,8 +641,8 @@ public class Main extends Application {
 		canvas.setOnMousePressed(e -> {
 			if (e.getButton() == MouseButton.SECONDARY) {
 				//Dragging the map around
-				dragStartX = e.getSceneX();
-				dragStartY = e.getSceneY();
+				dragStartX = e.getX();
+				dragStartY = e.getY();
 
 				System.out.println("found start pos as " + dragStartX + ' ' + dragStartY);
 				return;
@@ -667,14 +655,14 @@ public class Main extends Application {
 			
 			if (e.getButton() != MouseButton.SECONDARY) return;
 			
-			double dragDeltaX = e.getSceneX() - dragStartX;
-			double dragDeltaY = e.getSceneY() - dragStartY;
+			double dragDeltaX = e.getX() - dragStartX;
+			double dragDeltaY = e.getY() - dragStartY;
 			
 			cameraX += -dragDeltaX / (scalingFactor * zoom);
 			cameraY += -dragDeltaY / (scalingFactor * zoom);
 			
-			dragStartX = e.getSceneX();
-			dragStartY = e.getSceneY(); //So that we adjust relative to prev pos
+			dragStartX = e.getX();
+			dragStartY = e.getY(); //So that we adjust relative to prev pos
 			
 			render(gc, game, testingText);
 		});
