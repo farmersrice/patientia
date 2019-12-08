@@ -691,7 +691,6 @@ public class Main extends Application {
 		turnButtonBox.getChildren().add(turnButton);
 		infoPane.setBottom(turnButtonBox);
 		
-		
 
 		System.out.println("initial terrain: ");
 		render(gc, game, testingText);
@@ -699,6 +698,10 @@ public class Main extends Application {
 		stage.setScene(s);
 		
 		stage.show();
+	}
+	
+	public static void main(String[] args) {
+		Application.launch();
 	}
 
 }
