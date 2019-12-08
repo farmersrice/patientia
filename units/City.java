@@ -51,6 +51,6 @@ public class City extends StaticUnit {
 
 	@Override
 	public ResourceDelta getResourceDelta(Player owner) {
-		return new ResourceDelta(-population * (populationControlsEnacted ? 2 : 1), 0, population * owner.getWealthMultiplier() * (populationControlsEnacted ? 0.5 : 1));
+		return new ResourceDelta(-population * (populationControlsEnacted ? 2 : 1), 0, population * owner.getWealthMultiplier() * (populationControlsEnacted ? 0.5 : 1) - 2);
 	}
 }

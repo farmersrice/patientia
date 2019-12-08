@@ -162,7 +162,7 @@ public class GameManager {
 				filtered.add(o);
 			} else {
 				System.out.println("Deleting order, irrelevant " + o.getTarget().getId() + " " + o.getOrder().toString());
-				System.out.println("validity " + o.getTarget().isValid());
+				//System.out.println("validity " + o.getTarget().isValid());
 			}
 		}
 		outstandingOrders = filtered;

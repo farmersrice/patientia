@@ -36,6 +36,7 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
+import orders.AttackOrder;
 import orders.BuildCityOrder;
 import orders.BuildFarmOrder;
 import orders.BuildMineOrder;
@@ -47,6 +48,7 @@ import orders.TogglePopulationControlsOrder;
 import units.City;
 import units.Farm;
 import units.Mine;
+import units.MobileUnit;
 import units.Soldier;
 import units.Unit;
 import units.Worker;
@@ -84,7 +86,7 @@ public class Main extends Application {
 	final int scalingFactor = 10;
 	final int mapRows = 100;
 	final int mapCols = 60;
-	final int numPlayers = 4;
+	final int numPlayers = 400;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
 	double cameraX = mapRows / 2.0;
@@ -123,9 +125,9 @@ public class Main extends Application {
 	final int arrowSize = 8;
 	
 		
-	void drawArrow(GraphicsContext gc, double x1, double y1, double x2, double y2) {
-	    gc.setFill(Color.WHITE);
-	    gc.setStroke(Color.WHITE);
+	void drawArrow(GraphicsContext gc, double x1, double y1, double x2, double y2, Color c) {
+	    gc.setFill(c);
+	    gc.setStroke(c);
 
 	    double dx = x2 - x1, dy = y2 - y1;
 	    double angle = Math.atan2(dy, dx);
@@ -310,19 +312,64 @@ public class Main extends Application {
 					int lastY = curMobileUnit.getY();
 					
 					for (Order o : orders) {
-						if (o instanceof MoveOrder) {
-							double[] lastScreenPos = cellToScreen(lastX, lastY);
+						double[] lastScreenPos = cellToScreen(lastX, lastY);
+						double bigX = lastScreenPos[0] - totalScaling * 0.5;
+						double bigY = lastScreenPos[1] - totalScaling * 0.5;
+						
+						if (o instanceof MoveOrder || o instanceof AttackOrder) {
 							double curCenterX = lastScreenPos[0] + totalScaling / 2;
 							double curCenterY = lastScreenPos[1] + totalScaling / 2;
 							
-							double[] nextPos = cellToScreen(((MoveOrder) o).getTx(), ((MoveOrder) o).getTy());
+							int nextX = -1;
+							int nextY = -1;
+							
+							if (o instanceof MoveOrder) { 
+								MoveOrder o2 = (MoveOrder) o;
+								nextX = o2.getTx();
+								nextY = o2.getTy();
+							} else {
+								AttackOrder o2 = (AttackOrder) o;
+								int[] coords = o2.findTarget(selectedUnit);
+								nextX = coords[0];
+								nextY = coords[1];
+							}
+							
+							double[] nextPos = cellToScreen(nextX, nextY);
 							double nextCenterX = nextPos[0] + totalScaling / 2;
 							double nextCenterY = nextPos[1] + totalScaling / 2;
 							
-							drawArrow(gc, curCenterX, curCenterY, nextCenterX, nextCenterY);
+							drawArrow(gc, curCenterX, curCenterY, nextCenterX, nextCenterY, 
+									(o instanceof MoveOrder ? Color.WHITE : Color.RED));
 							
-							lastX = ((MoveOrder) o).getTx();
-							lastY = ((MoveOrder) o).getTy();
+							lastX = nextX;
+							lastY = nextY;
+						}
+						
+						gc.setFill(PLAYER_COLORS[0]);
+						
+						if (o instanceof BuildCityOrder) {
+							gc.fillRect(bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+							gc.drawImage(cityImage, bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+						}
+						
+						if (o instanceof BuildFarmOrder) {
+							gc.fillRect(bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+							gc.drawImage(farmImage, bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+						}
+						
+						if (o instanceof BuildMineOrder) {
+							gc.fillRect(bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+							gc.drawImage(mineImage, bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+						}
+						
+						if (o instanceof CreateSoldierOrder) {
+							gc.fillRect(bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+							gc.drawImage(swordImage, bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+						}
+						
+						if (o instanceof CreateWorkerOrder) {
+							gc.fillRect(bigX, bigY, 2 * totalScaling, 2 * totalScaling);
+							gc.drawImage(hammerImage, bigX, bigY, 2 * totalScaling, 2 * totalScaling);
 						}
 					}
 				}
@@ -346,7 +393,7 @@ public class Main extends Application {
 		t.setText("Food: " + df.format(us.getFood()) + " (" + (delf > 0 ? "+" : "") + df.format(delf) + ")" + '\n' 
 				+ "Minerals: " + df.format(us.getMinerals()) + " (" + (delm > 0 ? "+" : "") + df.format(delm) + ")" + '\n' 
 				+ "Wealth: " + df.format(us.getWealth()) + " (" + (delw > 0 ? "+" : "") + df.format(delw) + ")" + '\n' + 
-				"Selected unit: " + (selectedUnit != null ? selectedUnit.toString() + "\nTeam: " + selectedUnit.getTeam() : ""));
+				"Selected unit: " + (selectedUnit != null ? selectedUnit.toString() + "\nTeam: " + selectedUnit.getTeam()  + ", id: " + selectedUnit.getId(): ""));
 		
 		//System.out.println("rerender done");
 	}
@@ -584,7 +631,16 @@ public class Main extends Application {
 						} else {
 							//Move order!
 							if (selectedUnit != null && selectedUnit.getTeam() == 0) {
+								GameMap known = game.getPlayers()[0].getKnown();
+								
+								MobileUnit occupant = known.getMobileUnits()[clickedRow][clickedCol];
+
 								Order o = new MoveOrder(clickedRow, clickedCol);
+								
+								if (occupant != null && occupant.isValid() && occupant.getTeam() != 0) {
+									//Attack!!!!!!
+									o = new AttackOrder(occupant);
+								}
 								
 								game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), o, !shiftPressed));
 							}

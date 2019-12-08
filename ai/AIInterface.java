@@ -7,5 +7,5 @@ import game_manager.Player;
 
 public interface AIInterface {
 	
-	public ArrayList<OutstandingOrder> think(Player us);
+	public ArrayList<OutstandingOrder> think(Player us, int time);
 }
