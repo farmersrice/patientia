@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Queue;
 
+import javax.imageio.ImageIO;
+
 import game_manager.GameManager;
 import game_manager.OutstandingOrder;
 import game_manager.Player;
@@ -14,6 +16,7 @@ import game_map.Tile;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -79,8 +82,8 @@ public class Main extends Application {
 	//be changeable.
 	
 	final int scalingFactor = 10;
-	final int mapRows = 50;
-	final int mapCols = 30;
+	final int mapRows = 100;
+	final int mapCols = 60;
 	final int numPlayers = 4;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
@@ -89,12 +92,7 @@ public class Main extends Application {
 	
 	double dragStartX, dragStartY;
 
-	Image hammerImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\hammer_transparent.png");
-	Image sbeve = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\sbeve.png");
-	Image swordImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\sword_transparent.png");
-	Image cityImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\city_transparent.png");
-	Image farmImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\farm_transparent_real.png");
-	Image mineImage = new Image("file:C:\\Users\\lmqtfx\\eclipse-workspace\\patience\\src\\ui\\mine_transparent.png");
+	Image hammerImage = null, swordImage = null, cityImage = null, farmImage = null, mineImage = null;
 	
 	boolean shiftPressed = false;
 	
@@ -107,6 +105,20 @@ public class Main extends Application {
 			Color.rgb(0, 255, 0, 0.4), Color.rgb(0, 0, 255, 0.4)};
 
 	
+	void loadImages() {
+		try {
+			hammerImage = SwingFXUtils.toFXImage(ImageIO.read(getClass().getClassLoader().getResource("assets/hammer_transparent.png")), null);
+			swordImage = SwingFXUtils.toFXImage(ImageIO.read(getClass().getClassLoader().getResource("assets/sword_transparent.png")), null);
+			cityImage = SwingFXUtils.toFXImage(ImageIO.read(getClass().getClassLoader().getResource("assets/city_transparent.png")), null);
+			farmImage = SwingFXUtils.toFXImage(ImageIO.read(getClass().getClassLoader().getResource("assets/farm_transparent.png")), null);
+			mineImage = SwingFXUtils.toFXImage(ImageIO.read(getClass().getClassLoader().getResource("assets/mine_transparent.png")), null);
+			
+		} catch (Exception e) {
+			System.out.println("Failed to load images");
+			e.printStackTrace();
+		}
+		
+	}
 	//copied from https://stackoverflow.com/questions/35751576/javafx-draw-line-with-arrow-canvas
 	final int arrowSize = 8;
 	
@@ -428,6 +440,8 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage stage) throws Exception {
+		loadImages();
+		
 		stage.setTitle("test");
 		
 		//Group root = new Group();
