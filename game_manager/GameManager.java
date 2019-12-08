@@ -172,7 +172,9 @@ public class GameManager {
 		for (Unit u : order) {
 			if (u.isValid()) {
 				u.processPassiveEffects(this);
-				System.out.println("processing action " + u.getAction().getClass().getName());
+				
+				//NOTE: below print doesn't work with toggling pop. controls, b/c we will set true always
+				//System.out.println("processing action " + u.getAction().getClass().getName());
 				u.getAction().execute(u, this);
 			}
 		}

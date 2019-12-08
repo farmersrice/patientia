@@ -40,6 +40,7 @@ import orders.CreateSoldierOrder;
 import orders.CreateWorkerOrder;
 import orders.MoveOrder;
 import orders.Order;
+import orders.TogglePopulationControlsOrder;
 import units.City;
 import units.Farm;
 import units.Mine;
@@ -322,21 +323,7 @@ public class Main extends Application {
 		}
 		
 		//Calculate the expected deltas now
-		ResourceDelta thisTurnDelta = new ResourceDelta(0, 0, 0);
-		
-		for (int i = 0; i < mapRows; i++) {
-			for (int j = 0; j < mapCols; j++) {
-				Unit occupant = temp.getMobileUnits()[i][j];
-				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
-					thisTurnDelta.add(occupant.getResourceDelta(game.getPlayers()[0]));
-				}
-
-				occupant = temp.getStaticUnits()[i][j];
-				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
-					thisTurnDelta.add(occupant.getResourceDelta(game.getPlayers()[0]));
-				}
-			}
-		}
+		ResourceDelta thisTurnDelta = game.getPlayers()[0].getExpectedDelta();
 		
 		double delf = thisTurnDelta.getFood();
 		double delm = thisTurnDelta.getMinerals();
@@ -531,6 +518,11 @@ public class Main extends Application {
 			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new BuildMineOrder(), !shiftPressed));
 			updateOrderList();
 		});
+		Button togglePopulationControlsButton = new Button("Toggle pop controls");
+		togglePopulationControlsButton.setOnMouseClicked(e -> {
+			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new TogglePopulationControlsOrder(), !shiftPressed));
+			updateOrderList();
+		});
 		
 		
 		canvas.setOnMouseClicked(
@@ -590,6 +582,7 @@ public class Main extends Application {
 						orderBox.getChildren().remove(buildFarmButton);
 						orderBox.getChildren().remove(buildMineButton);
 						orderBox.getChildren().remove(buildCityButton);
+						orderBox.getChildren().remove(togglePopulationControlsButton);
 						
 						if (selectedUnit != null && selectedUnit.getTeam() == 0) {
 							selectedUnitOrdersText.setVisible(true);
@@ -604,6 +597,7 @@ public class Main extends Application {
 								//Add creation buttons
 								orderBox.getChildren().add(createWorkerButton);
 								orderBox.getChildren().add(createSoldierButton);
+								orderBox.getChildren().add(togglePopulationControlsButton);
 							} else if (selectedUnit instanceof Worker) {
 								orderBox.getChildren().add(buildFarmButton);
 								orderBox.getChildren().add(buildMineButton);

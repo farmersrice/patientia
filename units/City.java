@@ -15,6 +15,10 @@ public class City extends StaticUnit {
 	public boolean isPopulationControlsEnacted() {
 		return populationControlsEnacted;
 	}
+	
+	public void togglePopulationControls() {
+		populationControlsEnacted = !populationControlsEnacted;
+	}
 
 	public void setPopulationControlsEnacted(boolean populationControlsEnacted) {
 		this.populationControlsEnacted = populationControlsEnacted;
@@ -42,7 +46,7 @@ public class City extends StaticUnit {
 	}
 
 	public String toString() {
-		return "City, pop. " +  new DecimalFormat("#.##").format(population) + ", pop controls: " + populationControlsEnacted;
+		return "City, pop: " +  new DecimalFormat("#.##").format(population) + ", pop controls: " + populationControlsEnacted;
 	}
 
 	@Override

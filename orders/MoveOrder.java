@@ -20,8 +20,6 @@ public class MoveOrder extends Order {
 	}
 	
 	public boolean isComplete(Unit us) {
-		
-		
 		boolean curComplete = super.isComplete(us) && us.getX() == tx && us.getY() == ty;
 		
 		if (curComplete) return true;

@@ -1,6 +1,7 @@
 package game_manager;
 
 import game_map.GameMap;
+import units.Unit;
 
 public class Player {
 	private GameMap known;
@@ -14,6 +15,27 @@ public class Player {
 	private double wealthMultiplier = 1, combatMultiplier = 1, mineralsMultiplier = 1, foodMultiplier = 1;
 	
 	boolean lackingResources = false;
+	
+	public ResourceDelta getExpectedDelta() {
+		ResourceDelta thisTurnDelta = new ResourceDelta(0, 0, 0);
+		
+		GameMap temp = known;
+		for (int i = 0; i < temp.getR(); i++) {
+			for (int j = 0; j < temp.getC(); j++) {
+				Unit occupant = temp.getMobileUnits()[i][j];
+				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
+					thisTurnDelta.add(occupant.getResourceDelta(this));
+				}
+
+				occupant = temp.getStaticUnits()[i][j];
+				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
+					thisTurnDelta.add(occupant.getResourceDelta(this));
+				}
+			}
+		}
+		
+		return thisTurnDelta;
+	}
 	
 	private void checkResources() { //If we are low on resources, apply combat/wealth penalty
 		if (food < 0 || minerals < 0 || wealth < 0) {
