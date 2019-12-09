@@ -7,12 +7,16 @@ The ultimate laggy 4X game. The farther your units are from your cities, the slo
 Left click to select a unit. Right click to order the unit to move/attack an in-game tile. Right click and drag to move the map around. Use scrolling to change zoom level of the map. 
 
 
-N is a hotkey for next turn. If you hold down shift, you will be able to queue orders; if you aren't holding shift while you give an order, it will count as an override ("set") order, which deletes all prior orders.
+N is a hotkey for next turn. If you hold down shift, you will be able to queue orders; if you aren't holding shift while you give an order, it will count as an override ("set") order, which deletes all prior orders. Shift queueing orders also works on button-style orders (ex. build mine). 
 
 #Commentary
 The AI I've written seems insanely strong at first glance. I've just played the first three matches, and I got absolutely trashed by the AI.
 
 VERY unbalanced with respect to food right now. Food is basically useless, except for building new cities. The AI is basically swamped in food negatives despite building a ton of farms, so the first few cities that it builds with the 1k really count.
+
+Some bugs remain, especially with map vision. These will be fixed.
+
+Still need to add actual menu settings and such, right now everything's hardcoded.
 
 
 ### Direct download (jar file)
