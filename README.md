@@ -1,5 +1,6 @@
 patientia
 =======
+**DOWNLOAD: https://github.com/farmersrice/patientia/releases/download/v0/patientia_v0.zip**
 
 The ultimate laggy 4X game. The farther your units are from your cities, the slower they are to respond to your commands!
 
