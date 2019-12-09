@@ -34,6 +34,8 @@ public class AttackOrder extends Order {
 	}
 	
 	public boolean isComplete(Unit us) {
+		if (super.isComplete(us)) return true;
+		
 		int[] targetCoords = findTarget(us);
 		
 		if (targetCoords[0] == -1) {

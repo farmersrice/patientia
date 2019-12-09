@@ -2,21 +2,32 @@ package orders;
 
 import actions.Action;
 import actions.BuildMineAction;
-import units.StaticUnit;
+import game_map.GameMap;
+import game_map.Tile;
 import units.Unit;
 
-public class BuildMineOrder extends Order {
-
+public class BuildMineOrder extends BuildOrder {
 	
-	public boolean isComplete(Unit us) {
-		StaticUnit staticUnit = us.getKnown().getStaticUnits()[us.getX()][us.getY()];
-		return super.isComplete(us) || (staticUnit != null && staticUnit.isValid());
+	@Override
+	boolean isSuitableTile(Unit us, int i, int j) {
+		GameMap known = us.getKnown();
+		Unit mobileOccupant = known.getMobileUnits()[i][j];
+		Unit staticOccupant = known.getStaticUnits()[i][j];
+		
+		return known.getTerrain()[i][j] == Tile.MINERALS && 
+				(mobileOccupant == null || !mobileOccupant.isValid() || mobileOccupant.getId() == us.getId()) &&
+				(staticOccupant == null || !staticOccupant.isValid());
 	}
 	
 	@Override
 	public Action execute(Unit us) {
-		// TODO Auto-generated method stub
-		return new BuildMineAction();
+		Action res = super.execute(us);
+		
+		if (res == null) {
+			res = new BuildMineAction();
+		}
+		
+		return res;
 	}
 
 	public String toString() {

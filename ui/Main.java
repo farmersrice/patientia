@@ -28,6 +28,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -84,9 +85,9 @@ public class Main extends Application {
 	//be changeable.
 	
 	final int scalingFactor = 10;
-	final int mapRows = 100;
-	final int mapCols = 60;
-	final int numPlayers = 400;
+	final int mapRows = 50;
+	final int mapCols = 30;
+	final int numPlayers = 4;
 	final int canvasDimensionX = mapRows * scalingFactor;
 	final int canvasDimensionY = mapCols * scalingFactor;
 	double cameraX = mapRows / 2.0;
@@ -197,15 +198,6 @@ public class Main extends Application {
 		
 		Tile[][] terrain = temp.getTerrain();//new Tile[mapRows][mapCols];
 		
-		//System.out.println("got hammerImage " + hammerImage.getHeight() + ' ' +  hammerImage.getRequestedHeight());
-		for (int i = 0; i < mapRows; i++) {
-			for (int j = 0; j < mapCols; j++) {
-				if (temp.getMobileUnits()[i][j] != null) {
-					//terrain = temp.getMobileUnits()[i][j].getKnown().getTerrain();
-				}
-			}
-		}
-		//Tile[][] terrain = temp.getTerrain();
 		
 		gc.setFill(Color.BLACK);
 		gc.fillRect(0, 0, canvasDimensionX, canvasDimensionY);
@@ -555,7 +547,7 @@ public class Main extends Application {
 		
 		Button createSoldierButton = new Button("Create soldier");
 		createSoldierButton.setOnMouseClicked(e -> {
-			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new CreateSoldierOrder(1), !shiftPressed));
+			game.addOutstandingOrder(new OutstandingOrder(selectedUnit, game.getTurnCounter(), new CreateSoldierOrder(), !shiftPressed));
 			updateOrderList();
 		});
 		Button createWorkerButton = new Button("Create worker");
@@ -733,12 +725,14 @@ public class Main extends Application {
 		
 		Button turnButton = new Button();
 		turnButton.setText("Next turn");
-		turnButton.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				//for (int i = 0; i < 10; i++) {
-					update(gc, game, testingText);
-				//}
+		turnButton.setOnAction(e -> {
+			update(gc, game, testingText);
+		});
+		
+		s.setOnKeyTyped(e -> {
+			if (e.getCharacter().charAt(0) == 'n') {
+				//Next turn bois
+				update(gc, game, testingText);
 			}
 		});
 		

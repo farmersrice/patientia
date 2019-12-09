@@ -9,8 +9,8 @@ public class CreateSoldierOrder extends Order {
 
 	private double soldiers;
 	
-	public CreateSoldierOrder(double soldiers) {
-		this.soldiers = soldiers;
+	public CreateSoldierOrder() {
+		this.soldiers = 1;
 	}
 	
 	public boolean isComplete(Unit us) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.PriorityQueue;
 
+import ai.FirstAI;
 import game_map.GameMap;
 import game_map.Tile;
 import units.City;
@@ -35,9 +36,13 @@ public class GameManager {
 		players = new Player[numPlayers];
 		playerKnownUpdateQueues = new PriorityQueue[numPlayers];
 		
+		players[0] = new Player(1000, 100, 200, 0, false, null);
+		
+		for (int i = 1; i < numPlayers; i++) {
+			players[i] = new Player(1000, 100, 200, i, true, new FirstAI());
+		}
+		
 		for (int i = 0; i < numPlayers; i++) {
-			players[i] = new Player(100000, 100, 100);
-			
 			//The maps with the earliest times get updated first
 			playerKnownUpdateQueues[i] = new PriorityQueue<GameMap>((a, b) -> a.getUpdateTime() - b.getUpdateTime());
 		}
@@ -117,6 +122,13 @@ public class GameManager {
 	}
 	
 	public void turn() {
+		
+		for (int i = 1; i < numPlayers; i++) {
+			//Let the AI think
+			
+			outstandingOrders.addAll(players[i].getAi().think(players[i], turnCounter));
+		}
+		
 		ArrayList<Unit> order = new ArrayList<Unit>();
 		
 		Unit[][] units1 = omnimap.getMobileUnits();
@@ -150,7 +162,7 @@ public class GameManager {
 						u.addOrder(o.getOrder());
 					}
 					
-					System.out.println("processed order " + o.getTarget().getId() + " " + o.getOrder().toString());
+					//System.out.println("processed order " + o.getTarget().getId() + " " + o.getOrder().toString());
 					o.setDone(true);
 				}
 			}
@@ -161,7 +173,7 @@ public class GameManager {
 			if (!o.isDone() && o.getTarget().isValid()) {
 				filtered.add(o);
 			} else {
-				System.out.println("Deleting order, irrelevant " + o.getTarget().getId() + " " + o.getOrder().toString());
+				//System.out.println("Deleting order, irrelevant " + o.getTarget().getId() + " " + o.getOrder().toString());
 				//System.out.println("validity " + o.getTarget().isValid());
 			}
 		}
@@ -176,6 +188,45 @@ public class GameManager {
 				//NOTE: below print doesn't work with toggling pop. controls, b/c we will set true always
 				//System.out.println("processing action " + u.getAction().getClass().getName());
 				u.getAction().execute(u, this);
+			}
+		}
+		
+		//Since we performed a bunch of actions, we'll need to see if players are dead or not
+		for (int i = 0; i < numPlayers; i++) {
+			//Do any cities exist?
+			boolean alive = false;
+			
+			for (int j = 0; j < omnimap.getR(); j++) {
+				for (int k = 0; k < omnimap.getC(); k++) {
+					Unit staticOccupant = omnimap.getStaticUnits()[j][k];
+					
+					if (staticOccupant != null && staticOccupant.getTeam() == i && staticOccupant instanceof City) {
+						//Still alive!
+						alive = true;
+						break;
+					}
+				}
+			}
+			
+			if (!alive) {
+				//Rest in peace, now it's time to delete all the units 
+				
+				for (int j = 0; j < omnimap.getR(); j++) {
+					for (int k = 0; k < omnimap.getC(); k++) {
+						Unit mobileOccupant = omnimap.getMobileUnits()[j][k];
+						Unit staticOccupant = omnimap.getStaticUnits()[j][k];
+
+						if (mobileOccupant != null && mobileOccupant.getTeam() == i) {
+							omnimap.getMobileUnits()[j][k] = null;
+							mobileOccupant.setValid(false);
+						}
+						
+						if (staticOccupant != null && staticOccupant.getTeam() == i) {
+							omnimap.getStaticUnits()[j][k] = null;
+							staticOccupant.setValid(false);
+						}
+					}
+				}
 			}
 		}
 		

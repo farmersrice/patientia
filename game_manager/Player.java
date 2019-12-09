@@ -1,9 +1,11 @@
 package game_manager;
 
+import ai.AIInterface;
 import game_map.GameMap;
 import units.Unit;
 
 public class Player {
+	private int team;
 	private GameMap known;
 	private final int PREV_STORED = 50;
 	private GameMap[] prevKnown = new GameMap[PREV_STORED]; //Store the last 50 gamemaps -- hopefully nobody exceeds diameter 250 for now
@@ -14,7 +16,10 @@ public class Player {
 	
 	private double wealthMultiplier = 1, combatMultiplier = 1, mineralsMultiplier = 1, foodMultiplier = 1;
 	
-	boolean lackingResources = false;
+	private boolean lackingResources = false;
+	
+	private boolean isAI = false;
+	private AIInterface ai;
 	
 	public ResourceDelta getExpectedDelta() {
 		ResourceDelta thisTurnDelta = new ResourceDelta(0, 0, 0);
@@ -23,12 +28,12 @@ public class Player {
 		for (int i = 0; i < temp.getR(); i++) {
 			for (int j = 0; j < temp.getC(); j++) {
 				Unit occupant = temp.getMobileUnits()[i][j];
-				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
+				if (occupant != null && occupant.isValid() && occupant.getTeam() == team) {
 					thisTurnDelta.add(occupant.getResourceDelta(this));
 				}
 
 				occupant = temp.getStaticUnits()[i][j];
-				if (occupant != null && occupant.isValid() && occupant.getTeam() == 0) {
+				if (occupant != null && occupant.isValid() && occupant.getTeam() == team) {
 					thisTurnDelta.add(occupant.getResourceDelta(this));
 				}
 			}
@@ -85,10 +90,36 @@ public class Player {
 		this.foodMultiplier = foodMultiplier;
 	}
 
-	public Player(double f, double m, double w) {
-		food = f; minerals = m; wealth = w;
+	public Player(double f, double m, double w, int t, boolean isAI, AIInterface ai) {
+		food = f; minerals = m; wealth = w; team = t;
+		this.isAI = isAI;
+		this.ai = ai;
 	}
 	
+	public boolean isAI() {
+		return isAI;
+	}
+
+	public void setAI(boolean isAI) {
+		this.isAI = isAI;
+	}
+
+	public AIInterface getAi() {
+		return ai;
+	}
+
+	public void setAi(AIInterface ai) {
+		this.ai = ai;
+	}
+
+	public int getTeam() {
+		return team;
+	}
+
+	public void setTeam(int team) {
+		this.team = team;
+	}
+
 	public double getWealthMultiplier() {
 		checkResources();
 		return wealthMultiplier;

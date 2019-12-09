@@ -44,4 +44,8 @@ public class ResourceDelta { //small helper class to manage change in resources 
 	public void setWealth(double wealth) {
 		this.wealth = wealth;
 	}
+	
+	public String toString() {
+		return "food: " + food + " minerals: " + minerals + " wealth: " + wealth;
+	}
 }

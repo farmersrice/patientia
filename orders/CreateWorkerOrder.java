@@ -1,7 +1,6 @@
 package orders;
 
 import actions.Action;
-import actions.CreateSoldierAction;
 import actions.CreateWorkerAction;
 import units.MobileUnit;
 import units.Unit;

@@ -108,8 +108,8 @@ public class Algorithms {
 	
 	public static int[] moveTowards(GameMap known, int x, int y, int tx, int ty, Unit ignore) {
 		BfsReturn res = kingBFS(known, tx, ty, ignore);
-		System.out.println("moving from " + x + " " + y + " to " + res.getPar()[x][y][0] + " " + res.getPar()[x][y][1]);
-		System.out.println("distance is " + res.getDist()[x][y]);
+		//System.out.println("moving from " + x + " " + y + " to " + res.getPar()[x][y][0] + " " + res.getPar()[x][y][1]);
+		//System.out.println("distance is " + res.getDist()[x][y]);
 		return res.getPar()[x][y];
 		/*
 		final int IINF = 1000000000;
