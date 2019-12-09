@@ -84,6 +84,7 @@ public class Main extends Application {
 	//you may be wondering: why are these final ints not capitalized? well, it's because they won't be final later, they will
 	//be changeable.
 	
+	final boolean omniDebug = false;
 	final int scalingFactor = 10;
 	final int mapRows = 50;
 	final int mapCols = 30;
@@ -194,7 +195,7 @@ public class Main extends Application {
 	
 	public void render(GraphicsContext gc, GameManager game, Text t) {
 		//GameMap temp = game.getOmnimap();//game.getPlayers()[0].getKnown(); //game.getOmnimap();
-		GameMap temp = game.getPlayers()[0].getKnown();
+		GameMap temp = (omniDebug ? game.getOmnimap() : game.getPlayers()[0].getKnown());
 		
 		Tile[][] terrain = temp.getTerrain();//new Tile[mapRows][mapCols];
 		
@@ -592,14 +593,18 @@ public class Main extends Application {
 					if (Algorithms.isValidCoordinate(clickedRow, clickedCol, mapRows, mapCols)) {
 						
 						if (event.getButton() != MouseButton.SECONDARY) {
-							//Selecting a unit
-							Unit mobileOnClick = game.getPlayers()[0].getKnown().getMobileUnits()[clickedRow][clickedCol];
-							Unit staticOnClick = game.getPlayers()[0].getKnown().getStaticUnits()[clickedRow][clickedCol];
 							
-							//Omnipresent selection for debug purposes
-							//Unit mobileOnClick = game.getOmnimap().getMobileUnits()[clickedRow][clickedCol];
-							//Unit staticOnClick = game.getOmnimap().getStaticUnits()[clickedRow][clickedCol];
-
+							Unit mobileOnClick, staticOnClick;
+							
+							if (omniDebug) {
+								//Omnipresent selection for debug purposes
+								mobileOnClick = game.getOmnimap().getMobileUnits()[clickedRow][clickedCol];
+								staticOnClick = game.getOmnimap().getStaticUnits()[clickedRow][clickedCol];
+							} else {
+								//Selecting a unit
+								mobileOnClick = game.getPlayers()[0].getKnown().getMobileUnits()[clickedRow][clickedCol];
+								staticOnClick = game.getPlayers()[0].getKnown().getStaticUnits()[clickedRow][clickedCol];
+							}
 							
 							if (selectedUnit == null) {
 								if (mobileOnClick == null) {

@@ -3,6 +3,18 @@ patience
 
 The ultimate laggy 4X game. The farther your units are from your cities, the slower they are to respond to your commands!
 
+Here's some player vs. AI gameplay:
+![player gameplay](https://i.imgur.com/Cd5lOWM.png)
+
+And some AI vs. AI gameplay:
+
+![engaging ai gameplay](https://i.imgur.com/ll8KlKs.png)
+
+![engaging ai gameplay 2](https://i.imgur.com/R5f1y74.png)
+
+![engaging ai gameplay 3](https://i.imgur.com/aSmp7YZ.png)
+
+
 # Controls/gameplay
 Left click to select a unit. Right click to order the unit to move/attack an in-game tile. Right click and drag to move the map around. Use scrolling to change zoom level of the map. 
 
